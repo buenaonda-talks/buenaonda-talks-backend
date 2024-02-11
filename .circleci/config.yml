@@ -1,0 +1,83 @@
+version: 2.1
+
+orbs:
+  docker: circleci/docker@2.1
+  ssh: circleci/ssh@1.0.1
+
+parameters:
+  dockerhub_username:
+    type: env_var_name
+    default: DOCKERHUB_USERNAME
+  dockerhub_password:
+    type: env_var_name
+    default: DOCKERHUB_PASSWORD
+  ssh_host:
+    type: env_var_name
+    default: SSH_HOST
+  ssh_user:
+    type: env_var_name
+    default: SSH_USER
+  image_name:
+    type: string
+    default: "buenaonda-talks-api"
+
+commands:
+  docker_prepare:
+    description: "Prepare Docker image name and login"
+    parameters:
+      image_tag:
+        type: string
+        default: "$CIRCLE_SHA1"
+    steps:
+      - run:
+          name: Prepare Docker Image Name
+          command: |
+            echo "export IMAGE_NAME=<< parameters.dockerhub_username >>/<< parameters.image_name >>:<< parameters.image_tag >>" >> $BASH_ENV
+      - run:
+          name: Docker Login
+          command: echo ${<< parameters.dockerhub_password >>} | docker login -u ${<< parameters.dockerhub_username >>} --password-stdin
+
+jobs:
+  build_and_push:
+    executor: docker/docker
+    steps:
+      - checkout
+      - setup_remote_docker
+      - docker_prepare
+      - run:
+          name: Build and Push Docker Image
+          command: |
+            echo 'Building Docker image...'
+            docker build --cache-from $IMAGE_NAME -t $IMAGE_NAME .
+            docker push $IMAGE_NAME
+            echo 'Docker image pushed to Docker Hub.'
+
+  deploy:
+    executor: ssh/default
+    steps:
+      - run:
+          name: Deploy to DigitalOcean
+          command: |
+            CONTAINER_NAME="<< parameters.image_name >>-${CIRCLE_BRANCH}"
+            PORT=$(if [ "$CIRCLE_BRANCH" == "main" ]; then echo "8787"; else echo "8788"; fi)
+            ssh ${<< parameters.ssh_user >>}@${<< parameters.ssh_host >>} "\
+            echo 'Pulling Docker image...' && \
+            docker pull $IMAGE_NAME && \
+            echo 'Stopping and removing previous container...' && \
+            docker stop $CONTAINER_NAME || true && \
+            docker rm $CONTAINER_NAME || true && \
+            echo 'Starting new container...' && \
+            docker run -d --name $CONTAINER_NAME -p $PORT:3000 $IMAGE_NAME || \
+            echo 'Deployment failed.' && exit 1; \
+            echo 'Deployment successful.' && exit 0"
+
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - build_and_push:
+          context: dockerhub-credentials
+      - deploy:
+          requires:
+            - build_and_push
+          context: deployment-settings

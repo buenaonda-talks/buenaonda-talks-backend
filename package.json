@@ -1,6 +1,6 @@
 {
-    "name": "buenaonda-talks-api",
-    "main": "./build/index.js",
+    "name": "buenaonda-talks-backend",
+    "main": "./dist/src/index.js",
     "version": "0.0.1",
     "scripts": {
         "dev": "nodemon --watch \"src/**\" --ext \"ts,tsx,json\" --ignore \"src/**/*.spec.ts\" --exec \"ts-node -r tsconfig-paths/register src/index.ts\"",
