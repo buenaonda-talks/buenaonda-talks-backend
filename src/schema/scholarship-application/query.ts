@@ -154,9 +154,6 @@ schemaBuilder.queryFields((t) => ({
 
                     statement = statement.append(sql` LIMIT ${limit}`);
 
-                    // const sqliteDialect = new SQLiteSyncDialect();
-                    // console.log('statement', sqliteDialect.sqlToQuery(statement));
-
                     const result = await DB.run(statement);
                     return result.rows.map((row) => {
                         return selectApplicationSchema.parse({
