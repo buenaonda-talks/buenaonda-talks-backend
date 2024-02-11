@@ -30,7 +30,7 @@ Asegúrate de tener [Node.js](https://nodejs.org/) y npm instalados. Estas herra
 Empieza por clonar este repositorio en tu máquina local usando el siguiente comando:
 
 ```bash
-git clone https://github.com/buenaonda-talks/web-backend.git
+git clone https://github.com/buenaonda-talks/buenaonda-talks-backend.git
 cd buenaonda-talks-backend
 ```
 
