@@ -35,6 +35,11 @@ jobs:
     steps:
       - add_ssh_keys
       - run:
+          name: Add SSH Key to Known Hosts
+          command: |
+            mkdir -p ~/.ssh
+            ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
+      - run:
           name: Deploy to DigitalOcean
           command: |
             CONTAINER_NAME="buenaonda-talks-backend-${CIRCLE_BRANCH}"
