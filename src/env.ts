@@ -66,7 +66,7 @@ export const env = {
     REDIS: {
         HOST: process.env.REDIS_HOST!,
         PORT: parseInt(process.env.REDIS_PORT!, 10),
-        PASSWORD: process.env.REDIS_PASSWORD!,
+        PASSWORD: process.env.REDIS_PASSWORD || '',
     },
     POSTMARK_API_KEY: process.env.POSTMARK_API_KEY!,
     EXPRESS_SESSION_SECRET: process.env.EXPRESS_SESSION_SECRET!,
