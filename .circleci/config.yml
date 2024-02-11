@@ -40,11 +40,15 @@ jobs:
             mkdir -p ~/.ssh
             ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
       - run:
+          name: Docker Login
+          command: echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
+      - run:
           name: Deploy to DigitalOcean
           command: |
             CONTAINER_NAME="buenaonda-talks-backend-${CIRCLE_BRANCH}"
             PORT=$(if [ "$CIRCLE_BRANCH" == "main" ]; then echo "8787"; else echo "8788"; fi)
             ssh $SSH_USER@$SSH_HOST "\
+            export IMAGE_NAME=$IMAGE_NAME
             echo 'Pulling Docker image...' && \
             docker pull $IMAGE_NAME && \
             echo 'Stopping and removing previous container...' && \
