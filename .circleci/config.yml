@@ -6,20 +6,16 @@ orbs:
 
 parameters:
   dockerhub_username:
-    type: env_var_name
-    default: DOCKERHUB_USERNAME
+    type: string
   dockerhub_password:
-    type: env_var_name
-    default: DOCKERHUB_PASSWORD
+    type: string
   ssh_host:
-    type: env_var_name
-    default: SSH_HOST
+    type: string
   ssh_user:
-    type: env_var_name
-    default: SSH_USER
+    type: string
   image_name:
     type: string
-    default: "buenaonda-talks-api"
+    default: "buenaonda-talks-backend"
 
 commands:
   docker_prepare:
