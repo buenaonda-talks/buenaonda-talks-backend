@@ -4,18 +4,21 @@
         "allowJs": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
-        "noEmit": true,
+        "noEmit": false,
         "esModuleInterop": true,
         "incremental": true,
-        "target": "ESNext",
+        "target": "es6",
         "module": "CommonJS",
-        "lib": ["ESNext"],
         "jsx": "react",
         "baseUrl": ".",
+        "moduleResolution": "node",
         "paths": {
             "@/*": ["src/*"]
-        }
+        },
+        "outDir": "dist",
+        "sourceMap": true
     },
+    "lib": ["es2015"],
     "include": ["**/*.ts", "**/*.tsx", "@types/worker-configuration.d.ts"],
     "exclude": ["node_modules", ".next"]
 }

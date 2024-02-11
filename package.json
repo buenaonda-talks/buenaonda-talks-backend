@@ -4,7 +4,8 @@
     "version": "0.0.1",
     "scripts": {
         "dev": "nodemon --watch \"src/**\" --ext \"ts,tsx,json\" --ignore \"src/**/*.spec.ts\" --exec \"ts-node -r tsconfig-paths/register src/index.ts\"",
-        "worker": "nodemon --watch \"src/**\" --ext \"ts,tsx,json\" --ignore \"src/**/*.spec.ts\" --exec \"ts-node -r tsconfig-paths/register src/cron/applications-results-worker.ts\"",
+        "build": "tsc && tsc-alias -p tsconfig.json",
+        "start": "node dist/src/index.js",
         "db:gen": "drizzle-kit generate:sqlite && prettier ./drizzle --write",
         "db:gen:drop": "drizzle-kit drop",
         "db:gen:custom": "drizzle-kit generate:sqlite --custom",
@@ -52,6 +53,7 @@
         "graphql-scalars": "^1.22.4",
         "graphql-yoga": "^5.1.1",
         "lru_map": "^0.4.1",
+        "module-alias": "^2.2.3",
         "p-limit": "^3.1.0",
         "passport": "^0.7.0",
         "passport-local": "^1.0.0",
@@ -87,7 +89,11 @@
         "sqlite3": "^5.1.7",
         "ts-node": "^10.9.2",
         "ts-node-dev": "^2.0.0",
+        "tsc-alias": "^1.8.8",
         "tsx": "^4.7.0",
         "typescript": "^5.3.3"
+    },
+    "_moduleAliases": {
+        "@": "dist/src"
     }
 }

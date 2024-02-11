@@ -23,7 +23,7 @@ Antes de sumergirte en el desarrollo o la contribución a este proyecto, necesit
 
 ### Requisitos Previos
 
-Asegúrate de tener [Node.js](https://nodejs.org/) y npm instalados. Estas herramientas son esenciales para el manejo de dependencias y la ejecución de nuestro proyecto.
+Asegúrate de tener [Node.js](https://nodejs.org/) y yarn instalados. Estas herramientas son esenciales para el manejo de dependencias y la ejecución de nuestro proyecto.
 
 ### Clonación del Repositorio
 
@@ -48,10 +48,10 @@ Las claves de API y otros secretos no se almacenan directamente en el código. P
 
 ### Instalación de Dependencias
 
-Instala todas las dependencias necesarias con npm:
+Instala todas las dependencias necesarias con yarn:
 
 ```bash
-npm install
+yarn install
 ```
 
 ### Migración de la Base de Datos
@@ -59,7 +59,7 @@ npm install
 Para configurar tu base de datos localmente, ejecuta las migraciones necesarias:
 
 ```bash
-npm run db:migrate
+yarn db:migrate
 ```
 
 Este paso prepara tu base de datos para el proyecto, creando todas las tablas necesarias.
@@ -83,7 +83,7 @@ Genial, en este punto ya deberías estar listo para iniciar el servidor de desar
 Arranca el servidor de desarrollo con:
 
 ```bash
-npm run dev
+yarn dev
 ```
 
 Ahora podrás acceder al endpoint de GraphQL en [http://localhost:8787/graphql](http://localhost:8787/graphql) y empezar a experimentar con las queries y mutaciones.
@@ -97,7 +97,7 @@ Mantenemos un alto estándar de calidad del código utilizando herramientas como
 Para diseñar y enviar correos electrónicos, seguimos un enfoque basado en componentes con React Email. Encuentra y crea plantillas de correo electrónico en la carpeta `emails`. Utiliza el entorno de desarrollo específico de correos electrónicos para ver tus cambios en tiempo real:
 
 ```bash
-npm run email:dev
+yarn email:dev
 ```
 
 Claro, incorporar una sección específica sobre **Bull** y **Bull Board** en el `README.md` proporcionará a los desarrolladores una mejor comprensión de cómo se manejan las colas de trabajos y la monitorización de estos en el proyecto **BuenaOnda Talks API**. Aquí tienes un ejemplo de cómo podrías estructurar esta sección:

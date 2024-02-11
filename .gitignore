@@ -8,3 +8,5 @@ dump.sql
 output.sql
 tsconfig.tsbuildinfo
 .env
+dist/
+.DS_STORE
