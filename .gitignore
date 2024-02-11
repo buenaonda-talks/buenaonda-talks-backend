@@ -10,3 +10,4 @@ tsconfig.tsbuildinfo
 .env
 dist/
 .DS_STORE
+ecosystem.config.js
