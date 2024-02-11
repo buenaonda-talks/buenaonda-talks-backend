@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "strict": true,
+        "allowJs": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "noEmit": true,
+        "esModuleInterop": true,
+        "incremental": true,
+        "target": "ESNext",
+        "module": "CommonJS",
+        "lib": ["ESNext"],
+        "jsx": "react",
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["src/*"]
+        }
+    },
+    "include": ["**/*.ts", "**/*.tsx", "@types/worker-configuration.d.ts"],
+    "exclude": ["node_modules", ".next"]
+}

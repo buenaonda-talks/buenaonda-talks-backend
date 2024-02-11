@@ -1,0 +1,64 @@
+{
+    "env": {
+        "es2021": true,
+        "node": true
+    },
+    "overrides": [
+        {
+            "files": ["*.ts", "*.tsx"],
+            "plugins": ["@typescript-eslint", "import"],
+            "extends": [
+                "plugin:@typescript-eslint/recommended",
+                "plugin:prettier/recommended",
+                "prettier"
+            ]
+        },
+        {
+            "files": ["*.graphql", "*.gql"],
+            "parser": "@graphql-eslint/eslint-plugin",
+            "plugins": ["@graphql-eslint"],
+            "extends": [
+                "plugin:@graphql-eslint/schema-recommended",
+                "plugin:@graphql-eslint/operations-recommended"
+            ],
+            "parserOptions": {
+                "schema": "./src/generated/schema.graphql",
+                "operations": ["./src/tests/**/*.gql", "./src/tests/**/*.graphql"]
+            },
+            "rules": {
+                // Incredible Plugin.
+                // Rules URL: https://the-guild.dev/graphql/eslint/rules
+                "@graphql-eslint/unique-fragment-name": "error",
+                "@graphql-eslint/selection-set-depth": [
+                    "error",
+                    {
+                        "maxDepth": 10
+                    }
+                ]
+            }
+        }
+    ],
+    "settings": {
+        "import/resolver": {
+            "typescript": {}
+        }
+    },
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "project": "./tsconfig.json",
+        "tsconfigRootDir": "./"
+    },
+    "rules": {
+        "require-await": "error",
+        "no-unused-vars": "off",
+        "no-console": "error",
+        "@typescript-eslint/no-unused-vars": [
+            "error",
+            {
+                "argsIgnorePattern": "^_"
+            }
+        ],
+        "@typescript-eslint/no-explicit-any": "warn",
+        "@typescript-eslint/no-unnecessary-type-constraint": "off"
+    }
+}

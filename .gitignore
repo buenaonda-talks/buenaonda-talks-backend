@@ -1,0 +1,10 @@
+/.wrangler
+/node_modules
+/.yarn
+.dev.vars
+.DS_STORE
+db.sqlite3
+dump.sql
+output.sql
+tsconfig.tsbuildinfo
+.env
