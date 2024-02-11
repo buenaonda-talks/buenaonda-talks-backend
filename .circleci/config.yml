@@ -4,34 +4,17 @@ orbs:
   docker: circleci/docker@2.1
   ssh: circleci/ssh@1.0.1
 
-parameters:
-  dockerhub_username:
-    type: string
-  dockerhub_password:
-    type: string
-  ssh_host:
-    type: string
-  ssh_user:
-    type: string
-  image_name:
-    type: string
-    default: "buenaonda-talks-backend"
-
 commands:
   docker_prepare:
     description: "Prepare Docker image name and login"
-    parameters:
-      image_tag:
-        type: string
-        default: "$CIRCLE_SHA1"
     steps:
       - run:
           name: Prepare Docker Image Name
           command: |
-            echo "export IMAGE_NAME=<< parameters.dockerhub_username >>/<< parameters.image_name >>:<< parameters.image_tag >>" >> $BASH_ENV
+            echo "export IMAGE_NAME=$DOCKERHUB_USERNAME/$DOCKER_REPOSITORY:$CIRCLE_SHA1" >> $BASH_ENV
       - run:
           name: Docker Login
-          command: echo ${<< parameters.dockerhub_password >>} | docker login -u ${<< parameters.dockerhub_username >>} --password-stdin
+          command: echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
 
 jobs:
   build_and_push:
@@ -54,9 +37,9 @@ jobs:
       - run:
           name: Deploy to DigitalOcean
           command: |
-            CONTAINER_NAME="<< parameters.image_name >>-${CIRCLE_BRANCH}"
+            CONTAINER_NAME="buenaonda-talks-backend-${CIRCLE_BRANCH}"
             PORT=$(if [ "$CIRCLE_BRANCH" == "main" ]; then echo "8787"; else echo "8788"; fi)
-            ssh ${<< parameters.ssh_user >>}@${<< parameters.ssh_host >>} "\
+            ssh $SSH_USER@$SSH_HOST "\
             echo 'Pulling Docker image...' && \
             docker pull $IMAGE_NAME && \
             echo 'Stopping and removing previous container...' && \
