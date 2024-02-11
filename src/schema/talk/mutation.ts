@@ -204,11 +204,7 @@ schemaBuilder.mutationFields((t) => ({
         },
         resolve: async (parent, args, { DB, USER }) => {
             try {
-                const link = await TalkRepository.assistToTalk(
-                    DB,
-                    args.talkUuid,
-                    USER.id,
-                );
+                const link = await TalkRepository.assistToTalk(DB, args.talkUuid, USER);
 
                 return new AssistToTalkLink({
                     url: link,
@@ -220,7 +216,8 @@ schemaBuilder.mutationFields((t) => ({
 
                 return new ApiError({
                     code: 'ASSIST_TO_TALK_ERROR',
-                    message: 'Ocurrió un error al asistir a la charla',
+                    message:
+                        'Ocurrió un error al obtener el link para asistir a la charla',
                 });
             }
         },

@@ -1,9 +1,11 @@
 import {
+    SelectUserSchema,
     selectTalkInscriptionSchema,
     selectTalkSchema,
     talkInscriptionTable,
 } from '@/db/drizzle-schema';
 import { ApiError } from '@/schema/api-error/ref';
+import ZoomService from '@/service/ZoomService';
 import { YogaContext } from '@/types';
 import { eq } from 'drizzle-orm';
 
@@ -91,7 +93,11 @@ export const TalkRepository = {
 
         return selectTalkInscriptionSchema.parse(newInscription);
     },
-    assistToTalk: async (DB: YogaContext['DB'], talkUuid: string, userId: number) => {
+    assistToTalk: async (
+        DB: YogaContext['DB'],
+        talkUuid: string,
+        user: Pick<SelectUserSchema, 'id' | 'firstName' | 'lastName' | 'email'>,
+    ) => {
         const talk = await DB.query.talkTable.findFirst({
             where: (etc, operators) => {
                 return operators.and(
@@ -126,21 +132,36 @@ export const TalkRepository = {
             where: (etc, operators) => {
                 return operators.and(
                     operators.eq(etc.talkId, talk.id),
-                    operators.eq(etc.userId, userId),
+                    operators.eq(etc.userId, user.id),
                 );
             },
         });
 
         if (!inscription) {
-            inscription = await TalkRepository.signUpToTalk(DB, talkUuid, userId);
+            inscription = await TalkRepository.signUpToTalk(DB, talkUuid, user.id);
         }
 
         // TODO: GET LINK FROM ZOOM API
-        const link = inscription.joinUrl;
+        let link = inscription.joinUrl;
+        if (!link) {
+            if (!talk.zoomId) {
+                throw new ApiError({
+                    code: 'TALK_WITHOUT_ZOOM',
+                    message: 'La charla no tiene un ID de Zoom',
+                });
+            }
+
+            const zoomService = new ZoomService();
+            link = await zoomService.getJoinUrl({
+                user,
+                meetingId: parseInt(talk.zoomId, 10),
+            });
+        }
+
         if (!link) {
             throw new ApiError({
-                code: 'TALK_LINK_NOT_FOUND',
-                message: 'No se encontró el link para la charla',
+                code: 'TALK_WITHOUT_LINK',
+                message: 'No se pudo obtener el link de la charla',
             });
         }
 

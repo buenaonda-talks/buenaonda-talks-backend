@@ -22,6 +22,26 @@ export const validateEnv = () => {
             `POSTMARK_API_KEY is required. You can get this value from https://account.postmarkapp.com/servers`,
         );
     }
+
+    if (
+        !process.env.ZOOM_ACCOUNT_ID ||
+        !process.env.ZOOM_CLIENT_ID ||
+        !process.env.ZOOM_CLIENT_SECRET
+    ) {
+        throw new Error(
+            `ZOOM_ACCOUNT_ID, ZOOM_CLIENT_ID, and ZOOM_CLIENT_SECRET are required. You can get these values from https://marketplace.zoom.us/`,
+        );
+    }
+
+    if (
+        !process.env.REDIS_HOST ||
+        !process.env.REDIS_PORT ||
+        !process.env.REDIS_PASSWORD
+    ) {
+        throw new Error(
+            `REDIS_HOST, REDIS_PORT, and REDIS_PASSWORD are required. Ensure that you have a Redis server running and that the environment variables are set.`,
+        );
+    }
 };
 
 export const env = {
@@ -41,6 +61,16 @@ export const env = {
     TURSO: {
         DB_URL: process.env.TURSO_DB_URL!,
         DB_AUTH_TOKEN: process.env.TURSO_DB_AUTH_TOKEN!,
+    },
+    ZOOM: {
+        ACCOUNT_ID: process.env.ZOOM_ACCOUNT_ID!,
+        CLIENT_ID: process.env.ZOOM_CLIENT_ID!,
+        CLIENT_SECRET: process.env.ZOOM_CLIENT_SECRET!,
+    },
+    REDIS: {
+        HOST: process.env.REDIS_HOST!,
+        PORT: parseInt(process.env.REDIS_PORT!, 10),
+        PASSWORD: process.env.REDIS_PASSWORD!,
     },
     POSTMARK_API_KEY: process.env.POSTMARK_API_KEY!,
     EXPRESS_SESSION_SECRET: process.env.EXPRESS_SESSION_SECRET!,

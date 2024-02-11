@@ -1,7 +1,8 @@
 import Queue from 'bull';
 import { sendApplicationStatusEmailsJobPath } from './job';
+import { env } from '@/env';
 
 export const sendApplicationStatusEmailsQueue = new Queue('sendApplicationStatusEmails', {
-    redis: { port: 6379, host: '127.0.0.1' },
+    redis: { port: env.REDIS.PORT, host: env.REDIS.HOST, password: env.REDIS.PASSWORD },
 });
 sendApplicationStatusEmailsQueue.process(sendApplicationStatusEmailsJobPath);
