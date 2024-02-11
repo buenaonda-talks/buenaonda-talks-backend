@@ -152,10 +152,18 @@ export const TalkRepository = {
             }
 
             const zoomService = new ZoomService();
-            link = await zoomService.getJoinUrl({
-                user,
-                meetingId: parseInt(talk.zoomId, 10),
-            });
+
+            try {
+                link = await zoomService.getJoinUrl({
+                    user,
+                    meetingId: parseInt(talk.zoomId, 10),
+                });
+            } catch (error) {
+                throw new ApiError({
+                    code: 'TALK_ZOOM_CONNECTION_ERROR',
+                    message: 'Tuvimos un problema para comunicarnos con Zoom',
+                });
+            }
         }
 
         if (!link) {
