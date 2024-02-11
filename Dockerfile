@@ -25,7 +25,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 # Copying built artifacts from the builder stage
-COPY --from=builder /app/build ./build
+COPY --from=builder /app/dist ./dist
 
 # Copying dependencies
 COPY --from=builder /app/node_modules ./node_modules
