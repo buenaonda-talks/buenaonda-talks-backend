@@ -33,13 +33,9 @@ export const validateEnv = () => {
         );
     }
 
-    if (
-        !process.env.REDIS_HOST ||
-        !process.env.REDIS_PORT ||
-        !process.env.REDIS_PASSWORD
-    ) {
+    if (!process.env.REDIS_HOST || !process.env.REDIS_PORT) {
         throw new Error(
-            `REDIS_HOST, REDIS_PORT, and REDIS_PASSWORD are required. Ensure that you have a Redis server running and that the environment variables are set.`,
+            `REDIS_HOST and REDIS_PORT. Ensure that you have a Redis server running and that the environment variables are set.`,
         );
     }
 };
