@@ -3,7 +3,7 @@ FROM node:18-alpine3.18 AS builder
 WORKDIR /app
 
 # Ensure yarn is at its latest version
-RUN yarn global add yarn
+RUN yarn global add yarn@1.22.21
 
 # Copy package.json, yarn.lock, and other necessary files
 COPY package.json yarn.lock ./
