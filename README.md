@@ -122,6 +122,78 @@ En la página de inicio de sesión, introduce las credenciales de administrador 
 
 Las credenciales son configurables en el archivo `.env` bajo las variables `BULL_ADMIN_USERNAME` y `BULL_ADMIN_PASSWORD`.
 
+## Despliegue
+
+Para desplegar la aplicación en un servidor, se puede utilizar Docker y CircleCI para automatizar el proceso. A continuación se detallan los pasos para configurar el entorno en un droplet de DigitalOcean y en CircleCI.
+
+### Configuración del Entorno en el Droplet
+
+1. **Conectarse por SSH al Droplet**:
+   Abre una terminal y utiliza SSH para conectarte a tu droplet de DigitalOcean.
+
+    ```bash
+    ssh xxxxxxxxxx@xxxxxxxxxxxxxxxx
+    ```
+
+2. **Descargar la Imagen de Docker**:
+
+    Una vez conectado, descarga la imagen de Docker Hub.
+
+    ```bash
+    docker pull textcode/buenaonda-talks-backend
+    ```
+
+3. **Ejecuta la aplicación con Docker y Docker Compose**:
+
+    Utiliza Docker Compose para ejecutar la aplicación.
+
+    Para esto tenemos dos archivos diferentes muy similares, en distintas carpetas, uno para producción y otro para desarrollo.
+
+    El archivo `docker-compose.yml` trabaja en conjunto con el archivo `.env` para configurar las variables de entorno necesarias para la aplicación en producción y además trabaja con CircleCI para el tag dinámico de la imagen de Docker.
+
+    Un archivo de ejemplo para el `docker-compose.yml` es el siguiente:
+
+    ```yml
+    version: '3.8'
+
+    services:
+    app:
+        image: '${IMAGE_NAME}' # Use the image built by CircleCI
+        ports:
+            - '<PUERTO>:3000'
+        environment:
+            - NODE_ENV=staging
+        env_file:
+            - .env
+        depends_on:
+            - redis
+
+    redis:
+        image: 'redis:alpine'
+    ```
+
+### Configuración del Entorno en CircleCI
+
+1. **Agregar Variables de Entorno en CircleCI**:
+
+    Para que CircleCI pueda desplegar tu aplicación, agrega las variables de entorno necesarias en la configuración del proyecto en CircleCI.
+
+    - `DOCKERHUB_USERNAME`: Tu nombre de usuario de Docker Hub.
+    - `DOCKERHUB_PASSWORD`: Tu contraseña o token de acceso de Docker Hub.
+    - `DOCKER_REPOSITORY`: El nombre de tu repositorio de Docker Hub.
+    - `SSH_HOST`: La dirección IP de tu droplet de DigitalOcean.
+    - `SSH_USER`: El nombre de usuario para el acceso SSH a tu droplet.
+
+2. **Agregar Clave SSH a CircleCI**:
+
+    - Genera un par de claves SSH si aún no lo has hecho, o utiliza uno existente.
+    - Agrega la clave pública al archivo `~/.ssh/authorized_keys` en tu droplet.
+    - Agrega la clave privada a CircleCI en la configuración del proyecto en la sección de claves SSH.
+
+3. **Actualizar la Configuración de CircleCI**:
+
+    La configuración del CI se encuentra en `.circleci/config.yml` si necesitas ajustar los pasos para el despliegue, incluyendo el build de la imagen de Docker y el push a Docker Hub, así como el despliegue en el droplet de DigitalOcean a través de SSH junto a docker-compose.
+
 ## Licencia
 
 Este proyecto está bajo la licencia MIT. Esto significa que tienes amplia libertad para modificar, distribuir o incluso comercializar este software, siempre que incluyas el texto original de la licencia en cualquier versión redistribuida.

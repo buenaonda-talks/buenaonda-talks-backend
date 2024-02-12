@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  docker: circleci/docker@2.1
+  docker: circleci/docker@2.5.0
 
 commands:
   docker_prepare:
@@ -11,6 +11,7 @@ commands:
           name: Prepare Docker Image Name
           command: |
             echo "export IMAGE_NAME=$DOCKERHUB_USERNAME/$DOCKER_REPOSITORY:$CIRCLE_SHA1" >> $BASH_ENV
+            echo "export LATEST_IMAGE_NAME=$DOCKERHUB_USERNAME/$DOCKER_REPOSITORY:latest" >> $BASH_ENV
       - run:
           name: Docker Login
           command: echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
@@ -20,8 +21,16 @@ jobs:
     executor: docker/docker
     steps:
       - checkout
-      - setup_remote_docker
+      - setup_remote_docker:
+          docker_layer_caching: true
       - docker_prepare
+      - run:
+          name: Create Workspace Directory
+          command: mkdir -p /tmp/workspace
+      - run:
+          name: Write IMAGE_NAME to file
+          command: |
+            echo $IMAGE_NAME > /tmp/workspace/IMAGE_NAME.txt
       - run:
           name: Build and Push Docker Image
           command: |
@@ -29,7 +38,12 @@ jobs:
             docker pull $DOCKERHUB_USERNAME/$DOCKER_REPOSITORY:latest || true
             echo 'Building Docker image...'
             docker build --cache-from $DOCKERHUB_USERNAME/$DOCKER_REPOSITORY:latest -t $IMAGE_NAME .
+            echo 'Tagging Docker image with latest tag...'
+            docker tag $IMAGE_NAME $LATEST_IMAGE_NAME
+            echo 'Pushing Docker image with SHA tag...'
             docker push $IMAGE_NAME
+            echo 'Pushing Docker image with latest tag...'
+            docker push $LATEST_IMAGE_NAME
             echo 'Docker image pushed to Docker Hub.'
       - persist_to_workspace:
           root: /tmp/workspace
@@ -57,26 +71,51 @@ jobs:
       - run:
           name: Deploy to DigitalOcean
           command: |
-            CONTAINER_NAME="buenaonda-talks-backend-${CIRCLE_BRANCH}"
-            PORT=$(if [ "$CIRCLE_BRANCH" == "main" ]; then echo "8787"; else echo "8788"; fi)
-            ssh $SSH_USER@$SSH_HOST "\
-            echo 'Pulling Docker image...' && \
-            docker pull $IMAGE_NAME && \
-            echo 'Stopping and removing previous container...' && \
-            docker stop $CONTAINER_NAME || true && \
-            docker rm $CONTAINER_NAME || true && \
-            echo 'Starting new container...' && \
-            docker run -d --name $CONTAINER_NAME -p $PORT:3000 $IMAGE_NAME || \
-            echo 'Deployment failed.' && exit 1; \
-            echo 'Deployment successful.' && exit 0"
+            ssh $SSH_USER@$SSH_HOST "
+              export IMAGE_NAME=$IMAGE_NAME;
+
+              set -e;
+              CONTAINER_NAME='buenaonda-talks-backend-${CIRCLE_BRANCH}';
+              DEPLOY_DIR='/var/www/buenaondatalks/${CIRCLE_BRANCH}';
+              
+              # Ensure deployment directory exists and has latest docker-compose.yml
+              mkdir -p \$DEPLOY_DIR;
+              cd \$DEPLOY_DIR;
+              
+              # Here you could transfer your docker-compose.yml and any other needed files
+              # For example, using 'scp' or by cloning from a repository
+
+              # Pull latest image version
+              echo 'Pulling Docker image...';
+              docker pull $IMAGE_NAME;
+
+              # Start or update services with minimal downtime
+              echo 'Starting or updating services...';
+              docker compose -f docker-compose.yml up -d --force-recreate;
+
+              # Cleanup: pruning unused images/volumes
+              echo 'Cleaning up...';
+              docker image prune -af;
+
+              echo 'Deployment successful.';
+            "
 
 workflows:
-  version: 2
   build_and_deploy:
     jobs:
       - build_and_push:
           context: dockerhub-credentials
+          filters:
+            branches:
+              only:
+                - main
+                - staging
       - deploy:
           requires:
             - build_and_push
           context: deployment-settings
+          filters:
+            branches:
+              only:
+                - main
+                - staging

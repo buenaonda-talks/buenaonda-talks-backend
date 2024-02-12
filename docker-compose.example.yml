@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  app:
+    # Build the image using the Dockerfile in the current directory
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # Or use the image built by CircleCI (check the .circleci/config.yml file for context)
+    # image: "${IMAGE_NAME}"
+    ports:
+      - "8787:3000"
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - .env
+    depends_on:
+      - redis
+
+  redis:
+    image: "redis:alpine"
