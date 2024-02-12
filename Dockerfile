@@ -21,9 +21,6 @@ RUN yarn build
 FROM node:18-alpine3.18
 WORKDIR /app
 
-# Set environment to production
-ENV NODE_ENV=production
-
 # Copying built artifacts from the builder stage
 COPY --from=builder /app/dist ./dist
 
@@ -38,7 +35,7 @@ USER appuser
 STOPSIGNAL SIGTERM
 
 # Exposing port (adjust if different)
-EXPOSE 8787
+EXPOSE 3000
 
 # Command to run the app
 CMD ["node", "dist/src/index.js"]
