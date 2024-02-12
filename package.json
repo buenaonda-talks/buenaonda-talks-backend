@@ -4,7 +4,7 @@
     "version": "0.0.1",
     "scripts": {
         "dev": "nodemon --watch \"src/**\" --ext \"ts,tsx,json\" --ignore \"src/**/*.spec.ts\" --exec \"ts-node -r tsconfig-paths/register src/index.ts\"",
-        "build": "tsc && tsc-alias -p tsconfig.json",
+        "build": "tsc && tsc-alias -p tsconfig.json && mkdir -p dist/src/views && cp ./src/views/*.ejs ./dist/src/views/",
         "start": "node dist/src/index.js",
         "db:gen": "drizzle-kit generate:sqlite && prettier ./drizzle --write",
         "db:gen:drop": "drizzle-kit drop",
