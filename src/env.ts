@@ -44,7 +44,7 @@ export const env = {
     APP_ENV: process.env.APP_ENV || 'development',
     isProduction: process.env.APP_ENV === 'production',
     isStaging: process.env.APP_ENV === 'staging',
-    isDevelopment: process.env.APP_ENV === 'development',
+    isDevelopment: (process.env.APP_ENV || 'development') === 'development',
     BULL_ADMIN: {
         username: process.env.BULL_ADMIN_USERNAME!,
         password: process.env.BULL_ADMIN_PASSWORD!,
@@ -72,6 +72,7 @@ export const env = {
     EXPRESS_SESSION_SECRET: process.env.EXPRESS_SESSION_SECRET!,
     ENFORCED_JWT_TOKEN: process.env.ENFORCED_JWT_TOKEN,
     PORT: process.env.PORT || 8787,
+    ALLOWED_ORIGIN: process.env.ALLOWED_ORIGIN || 'http://localhost:3000',
 };
 
 // Validate environment variables at the start

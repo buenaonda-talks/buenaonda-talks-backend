@@ -54,9 +54,7 @@ export const createGraphQLServer = () => {
         },
         cors: () => {
             return {
-                origin: env.isDevelopment
-                    ? 'http://localhost:3000'
-                    : 'https://buenaondatalks.com',
+                origin: env.ALLOWED_ORIGIN,
                 credentials: true,
                 allowedHeaders: ['*'],
                 methods: ['POST', 'GET', 'OPTIONS'],
