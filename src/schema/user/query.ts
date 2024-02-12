@@ -33,7 +33,14 @@ const UsersFilterRef = schemaBuilder.inputType('UsersFilter', {
 schemaBuilder.queryFields((t) => ({
     user: t.field({
         type: UserRef,
+        nullable: true,
         resolve: async (parent, args, { DB, USER }) => {
+            // eslint-disable-next-line no-console
+            console.log('USER', USER);
+            if (!USER) {
+                return null;
+            }
+
             const isStudent = await DB.query.studentProfileTable
                 .findFirst({
                     where: (field, { eq }) => {
