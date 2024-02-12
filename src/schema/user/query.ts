@@ -33,8 +33,55 @@ const UsersFilterRef = schemaBuilder.inputType('UsersFilter', {
 schemaBuilder.queryFields((t) => ({
     user: t.field({
         type: UserRef,
-        resolve: (parent, args, { USER }) => {
-            return USER;
+        resolve: async (parent, args, { DB, USER }) => {
+            const isStudent = await DB.query.studentProfileTable
+                .findFirst({
+                    where: (field, { eq }) => {
+                        return eq(field.userId, USER.id);
+                    },
+                    columns: {
+                        id: true,
+                    },
+                })
+                .then((student) => {
+                    return !!student;
+                });
+
+            const isTeacher = await DB.query.teacherProfileTable
+                .findFirst({
+                    where: (field, { eq }) => {
+                        return eq(field.userId, USER.id);
+                    },
+                    columns: {
+                        id: true,
+                    },
+                })
+                .then((teacher) => {
+                    return !!teacher;
+                });
+
+            const isAdmin = await DB.query.adminProfileTable
+                .findFirst({
+                    where: (field, { eq }) => {
+                        return eq(field.userId, USER.id);
+                    },
+                    columns: {
+                        id: true,
+                    },
+                })
+                .then((admin) => {
+                    return !!admin;
+                });
+
+            const userToReturn = {
+                ...USER,
+                isStudent: isStudent,
+                isTeacher: isTeacher,
+                isAdmin: isAdmin,
+                isSuperAdmin: USER.isSuperAdmin || false,
+            };
+
+            return userToReturn;
         },
     }),
 

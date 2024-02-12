@@ -84,8 +84,8 @@ schemaBuilder.objectType(UserRef, {
 
         isStudent: t.field({
             type: 'Boolean',
-            resolve: (parent, _args, { DB }) => {
-                return DB.query.studentProfileTable
+            resolve: async (parent, _args, { DB }) => {
+                return await DB.query.studentProfileTable
                     .findFirst({
                         where: (field, { eq }) => {
                             return eq(field.userId, parent.id);
@@ -102,8 +102,8 @@ schemaBuilder.objectType(UserRef, {
 
         isTeacher: t.field({
             type: 'Boolean',
-            resolve: (parent, _args, { DB }) => {
-                return DB.query.teacherProfileTable
+            resolve: async (parent, _args, { DB }) => {
+                return await DB.query.teacherProfileTable
                     .findFirst({
                         where: (field, { eq }) => {
                             return eq(field.userId, parent.id);
@@ -120,8 +120,8 @@ schemaBuilder.objectType(UserRef, {
 
         isAdmin: t.field({
             type: 'Boolean',
-            resolve: (parent, _args, { DB }) => {
-                return DB.query.adminProfileTable
+            resolve: async (parent, _args, { DB }) => {
+                return await DB.query.adminProfileTable
                     .findFirst({
                         where: (field, { eq }) => {
                             return eq(field.userId, parent.id);
