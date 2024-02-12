@@ -8,6 +8,10 @@ dump.sql
 output.sql
 tsconfig.tsbuildinfo
 .env
+.env.production
+.env.development
+.env.local
+.env.staging
 dist/
 .DS_STORE
 ecosystem.config.js
