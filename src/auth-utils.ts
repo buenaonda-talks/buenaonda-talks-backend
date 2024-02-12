@@ -71,6 +71,7 @@ export const getUserWithClerkAsync = async ({ request, DB }: Options) => {
         .limit(1)
         .get()
         .then((x) => !!x?.id);
+
     const isAdmin = await DB.select({
         id: adminProfileTable.id,
     })
@@ -80,12 +81,15 @@ export const getUserWithClerkAsync = async ({ request, DB }: Options) => {
         .get()
         .then((x) => !!x?.id);
 
+    const isSuperAdmin = user.isSuperAdmin;
+
     await Clerk({
         secretKey: env.CLERK.SECRET_KEY,
         jwtKey: env.CLERK.PEM_PUBLIC_KEY,
     }).users.updateUserMetadata(verified.id as string, {
         publicMetadata: {
             roles: [...(isStudent ? ['student'] : []), ...(isAdmin ? ['admin'] : [])],
+            ...(isSuperAdmin ? ['superadmin'] : []),
         },
     });
 

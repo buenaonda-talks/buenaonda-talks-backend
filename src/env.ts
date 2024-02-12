@@ -1,6 +1,12 @@
 import 'dotenv/config';
 
 export const validateEnv = () => {
+    if (!process.env.ALLOWED_ORIGIN) {
+        throw new Error(
+            `ALLOWED_ORIGIN is required. You can set this to the URL of your frontend application.`,
+        );
+    }
+
     if (
         !process.env.CLERK_PEM_PUBLIC_KEY ||
         !process.env.CLERK_ISSUER_ID ||
