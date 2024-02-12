@@ -1,6 +1,7 @@
 import { render } from '@react-email/render';
 import { renderAsync } from '@react-email/components';
 import { Message } from 'postmark';
+import { env } from '@/env';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const postmark = require('postmark');
@@ -21,7 +22,7 @@ export const sendReactEmail = async ({
     const TextBody = await renderAsync(Component, { plainText: true });
 
     return client.sendEmail({
-        From: 'ignacio@9punto5.cl',
+        From: env.EMAIL_FROM,
         HtmlBody: HtmlBody,
         TextBody: TextBody,
         ...options,

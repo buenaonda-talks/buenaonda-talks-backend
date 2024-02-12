@@ -38,6 +38,24 @@ export const validateEnv = () => {
             `REDIS_HOST and REDIS_PORT. Ensure that you have a Redis server running and that the environment variables are set.`,
         );
     }
+
+    if (!process.env.EXPRESS_SESSION_SECRET) {
+        throw new Error(
+            `EXPRESS_SESSION_SECRET is required. You can set this to any random string.`,
+        );
+    }
+
+    if (!process.env.BULL_ADMIN_USERNAME || !process.env.BULL_ADMIN_PASSWORD) {
+        throw new Error(
+            `BULL_ADMIN_USERNAME and BULL_ADMIN_PASSWORD are required. You can set these to any username and password.`,
+        );
+    }
+
+    if (!process.env.EMAIL_FROM) {
+        throw new Error(
+            `EMAIL_FROM is required. You can set this to any email address allowed to send emails from Postmark.`,
+        );
+    }
 };
 
 export const env = {
@@ -73,6 +91,7 @@ export const env = {
     ENFORCED_JWT_TOKEN: process.env.ENFORCED_JWT_TOKEN,
     PORT: process.env.PORT || 8787,
     ALLOWED_ORIGIN: process.env.ALLOWED_ORIGIN || 'http://localhost:3000',
+    EMAIL_FROM: process.env.EMAIL_FROM!,
 };
 
 // Validate environment variables at the start
