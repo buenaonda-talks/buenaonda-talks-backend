@@ -21,6 +21,9 @@ const IsAdmin = preExecRule({
 
     const isAdmin = DB.query.adminProfileTable.findFirst({
         where: (etc, { eq }) => eq(etc.userId, USER.id),
+        columns: {
+            id: true,
+        },
     });
 
     if (!isAdmin) {
@@ -39,9 +42,33 @@ const IsStudent = preExecRule({
 
     const student = DB.query.studentProfileTable.findFirst({
         where: (etc, { eq }) => eq(etc.userId, USER.id),
+        columns: {
+            id: true,
+        },
     });
 
     if (!student) {
+        return false;
+    }
+
+    return true;
+});
+
+const IsTeacher = preExecRule({
+    error: 'No tienes permisos para realizar esta acción',
+})(({ USER, DB }: YogaContext) => {
+    if (!USER) {
+        return false;
+    }
+
+    const teacher = DB.query.teacherProfileTable.findFirst({
+        where: (etc, { eq }) => eq(etc.userId, USER.id),
+        columns: {
+            id: true,
+        },
+    });
+
+    if (!teacher) {
         return false;
     }
 
@@ -52,4 +79,5 @@ export const authzRules = {
     IsAuthenticated,
     IsAdmin,
     IsStudent,
+    IsTeacher,
 } as const;

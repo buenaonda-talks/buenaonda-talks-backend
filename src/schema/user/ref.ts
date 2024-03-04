@@ -1,10 +1,15 @@
 import {
+    ScholarshipConvocatoryKind,
     SelectStudentSchema,
+    SelectTeacherSchema,
     SelectUserSchema,
     selectStudentSchema,
     selectUsersSchema,
 } from '@/db/drizzle-schema';
 import { schemaBuilder } from '@/schema/schema-builder';
+import { TalkInscriptionRef } from '../talk';
+import { ApplicationRef } from '../scholarship-application';
+import { ScholarshipApplicationRepository } from '@/db/repository/scholarship-application';
 
 /* 
 export const userTable = sqliteTable(
@@ -185,5 +190,86 @@ schemaBuilder.objectType(StudentRef, {
 
         collegeId: t.exposeID('collegeId', { nullable: true }),
         convocatoryId: t.exposeID('convocatoryId', { nullable: true }),
+
+        lastPlatziTalkInscription: t.field({
+            type: TalkInscriptionRef,
+            nullable: true,
+            resolve: async (parent, _args, { DB }) => {
+                const assistance = await DB.query.talkInscriptionTable.findFirst({
+                    where: (fields, ops) => {
+                        return ops.eq(fields.userId, parent.userId);
+                    },
+                });
+
+                if (!assistance) {
+                    return null;
+                }
+
+                return assistance;
+            },
+        }),
+
+        lastPlatziApplication: t.field({
+            type: ApplicationRef,
+            nullable: true,
+            resolve: async (parent, _args, { DB }) => {
+                const application =
+                    await ScholarshipApplicationRepository.getLastUserApplication(
+                        DB,
+                        parent,
+                        ScholarshipConvocatoryKind.PLATZI,
+                    );
+
+                if (!application) {
+                    return null;
+                }
+
+                return application;
+            },
+        }),
+
+        lastDevfApplication: t.field({
+            type: ApplicationRef,
+            nullable: true,
+            resolve: async (parent, _args, { DB }) => {
+                const application =
+                    await ScholarshipApplicationRepository.getLastUserApplication(
+                        DB,
+                        parent,
+                        ScholarshipConvocatoryKind.DEVF,
+                    );
+
+                if (!application) {
+                    return null;
+                }
+
+                return application;
+            },
+        }),
+    }),
+});
+
+export const TeacherRef = schemaBuilder.objectRef<SelectTeacherSchema>('Teacher');
+schemaBuilder.objectType(TeacherRef, {
+    description: 'Representation of a teacher',
+    fields: (t) => ({
+        id: t.exposeID('id', { nullable: false }),
+
+        user: t.field({
+            type: UserRef,
+            resolve: async (parent, _args, { DB }) => {
+                const user = await DB.query.userTable.findFirst({
+                    where: (field, { eq }) => {
+                        return eq(field.id, parent.userId);
+                    },
+                });
+
+                if (!user) {
+                    throw new Error('User not found');
+                }
+
+                return selectUsersSchema.parse(user);
+            },
+        }),
     }),
 });

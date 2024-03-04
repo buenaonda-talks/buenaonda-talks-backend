@@ -11,7 +11,7 @@ import { and, desc, eq } from 'drizzle-orm';
 export const ScholarshipApplicationRepository = {
     getLastUserApplication: async (
         DB: YogaContext['DB'],
-        USER: NonNullable<YogaContext['USER']>,
+        USER: Pick<NonNullable<YogaContext['USER']>, 'id'>,
         kind: ScholarshipConvocatoryKind,
     ) => {
         const result = await DB.select()

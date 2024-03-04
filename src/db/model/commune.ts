@@ -1,12 +1,16 @@
 import { index, int, text, sqliteTable } from 'drizzle-orm/sqlite-core';
 import { TIMESTAMP_FIELDS } from '@/db/shared';
+import { createSelectSchema } from 'drizzle-zod';
+import { z } from 'zod';
 
 export const communeTable = sqliteTable(
     'core_communemodel',
     {
         id: int('id').primaryKey({ autoIncrement: true }).notNull(),
         name: text('name').notNull(),
-        regionId: int('region_id').references(() => regionTable.id),
+        regionId: int('region_id')
+            .references(() => regionTable.id)
+            .notNull(),
         normalizedName: text('normalized_name').notNull(),
         ...TIMESTAMP_FIELDS,
     },
@@ -38,3 +42,9 @@ export const regionTable = sqliteTable(
         };
     },
 );
+
+export const selectCommuneSchema = createSelectSchema(communeTable);
+export type SelectCommuneSchema = z.infer<typeof selectCommuneSchema>;
+
+export const selectRegionSchema = createSelectSchema(regionTable);
+export type SelectRegionSchema = z.infer<typeof selectRegionSchema>;

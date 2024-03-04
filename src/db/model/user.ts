@@ -124,23 +124,39 @@ export const studentProfileTable = sqliteTable(
         grade: int('grade'),
         timeItTakesToSchool: int('time_it_takes_to_school'),
         willTakePaesTest: int('will_take_paes_test'),
-        isStudent: int('is_student').notNull(),
+        isStudent: int('is_student', {
+            mode: 'boolean',
+        }).notNull(),
         uuid: text('uuid').notNull(),
-        hasUnsuscribed: int('has_unsuscribed').notNull(),
-        unsubscriptionDate: int('unsubscription_date'),
+        hasUnsuscribed: int('has_unsuscribed', {
+            mode: 'boolean',
+        }).notNull(),
+        unsubscriptionDate: int('unsubscription_date', {
+            mode: 'timestamp_ms',
+        }),
         unsubscriptionReason: int('unsubscription_reason'),
         unsubscriptionText: text('unsubscription_text'),
         convocatoryId: int('convocatory_id').references(() => convocatoryTable.id),
         communeId: int('commune_id').references(() => communeTable.id),
-        forAylin: int('for_aylin').notNull(),
-        aylinCalled: int('aylin_called').notNull(),
-        aylinCalledDate: int('aylin_called_date'),
-        hasClickedWhatsappLink: int('has_clicked_whatsapp_link').notNull(),
-        whatsappLinkClickDate: int('whatsapp_link_click_date'),
+        forAylin: int('for_aylin', {
+            mode: 'boolean',
+        }).notNull(),
+        aylinCalled: int('aylin_called', {
+            mode: 'boolean',
+        }).notNull(),
+        aylinCalledDate: int('aylin_called_date', {
+            mode: 'timestamp_ms',
+        }),
+        hasClickedWhatsappLink: int('has_clicked_whatsapp_link', {
+            mode: 'boolean',
+        }).notNull(),
+        whatsappLinkClickDate: int('whatsapp_link_click_date', {
+            mode: 'timestamp_ms',
+        }),
         note: text('note'),
-        initiatedSessionWithPhoneToken: int(
-            'initiated_session_with_phone_token',
-        ).notNull(),
+        initiatedSessionWithPhoneToken: int('initiated_session_with_phone_token', {
+            mode: 'boolean',
+        }).notNull(),
         ...TIMESTAMP_FIELDS,
     },
     (table) => {
@@ -167,6 +183,9 @@ export const studentProfileTable = sqliteTable(
 export const selectStudentSchema = createSelectSchema(studentProfileTable);
 export type SelectStudentSchema = z.infer<typeof selectStudentSchema>;
 
+export const insertStudentSchema = createInsertSchema(studentProfileTable);
+export type InsertStudentSchema = z.infer<typeof insertStudentSchema>;
+
 export const interestedProfileTable = sqliteTable('generations_interestedmodel', {
     id: int('id').primaryKey({ autoIncrement: true }).notNull(),
     createdOn: int('created_on').notNull(),
@@ -179,18 +198,22 @@ export const interestedProfileTable = sqliteTable('generations_interestedmodel',
 
 export const adminProfileTable = sqliteTable('generations_administratormodel', {
     id: int('id').primaryKey({ autoIncrement: true }).notNull(),
-    createdOn: int('created_on').notNull(),
-    modifiedOn: int('modified_on').notNull(),
     userId: int('user_id')
         .notNull()
         .references(() => userTable.id),
+    ...TIMESTAMP_FIELDS,
 });
 
 export const teacherProfileTable = sqliteTable('generations_teachermodel', {
     id: int('id').primaryKey({ autoIncrement: true }).notNull(),
-    createdOn: int('created_on').notNull(),
-    modifiedOn: int('modified_on').notNull(),
     userId: int('user_id')
         .notNull()
         .references(() => userTable.id),
+    ...TIMESTAMP_FIELDS,
 });
+
+export const selectTeacherSchema = createSelectSchema(teacherProfileTable);
+export type SelectTeacherSchema = z.infer<typeof selectTeacherSchema>;
+
+export const insertTeacherSchema = createInsertSchema(teacherProfileTable);
+export type InsertTeacherSchema = z.infer<typeof insertTeacherSchema>;

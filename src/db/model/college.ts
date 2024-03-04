@@ -2,7 +2,7 @@ import { index, int, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import { TIMESTAMP_FIELDS } from '@/db/shared';
 import { communeTable } from './commune';
 import { teacherProfileTable } from './user';
-import { createSelectSchema } from 'drizzle-zod';
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
 export const collegeTable = sqliteTable(
@@ -26,7 +26,7 @@ export const collegeTable = sqliteTable(
     },
 );
 
-export const collegesCollegeteacherrelationmodel = sqliteTable(
+export const collegeAndTeacherRelationTable = sqliteTable(
     'colleges_collegeteacherrelationmodel',
     {
         id: int('id').primaryKey({ autoIncrement: true }).notNull(),
@@ -57,9 +57,19 @@ export const collegesCollegeteacherrelationmodel = sqliteTable(
 export const selectCollegeSchema = createSelectSchema(collegeTable);
 export type SelectCollegeSchema = z.infer<typeof selectCollegeSchema>;
 
+export const insertCollegeSchema = createInsertSchema(collegeTable);
+export type InsertCollegeSchema = z.infer<typeof insertCollegeSchema>;
+
 export const selectCollegeTeacherRelationSchema = createSelectSchema(
-    collegesCollegeteacherrelationmodel,
+    collegeAndTeacherRelationTable,
 );
 export type SelectCollegeTeacherRelationSchema = z.infer<
     typeof selectCollegeTeacherRelationSchema
+>;
+
+export const insertCollegeTeacherRelationSchema = createInsertSchema(
+    collegeAndTeacherRelationTable,
+);
+export type InsertCollegeTeacherRelationSchema = z.infer<
+    typeof insertCollegeTeacherRelationSchema
 >;

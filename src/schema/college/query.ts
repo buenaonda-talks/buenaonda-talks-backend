@@ -18,4 +18,26 @@ schemaBuilder.queryFields((t) => ({
             return results.map((u) => selectCollegeSchema.parse(u));
         },
     }),
+
+    collegesByCommune: t.field({
+        type: [CollegeRef],
+        authz: {
+            rules: ['IsAuthenticated'],
+        },
+        args: {
+            communeId: t.arg.int({
+                required: true,
+            }),
+        },
+        resolve: async (parent, { communeId }, { DB }) => {
+            const results = await DB.query.collegeTable.findMany({
+                where: (field, { eq }) => eq(field.communeId, communeId),
+                orderBy(fields, operators) {
+                    return operators.desc(fields.id);
+                },
+            });
+
+            return results.map((u) => selectCollegeSchema.parse(u));
+        },
+    }),
 }));

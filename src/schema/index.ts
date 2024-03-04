@@ -7,6 +7,7 @@ import './scholarship';
 import './scholarship-form';
 import './scholarship-application';
 import './talk';
+import './commune';
 import './custom-queries';
 import './admin-custom-queries';
 
