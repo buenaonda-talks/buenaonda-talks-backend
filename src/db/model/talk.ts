@@ -63,6 +63,10 @@ export const talkTable = sqliteTable(
                 table.convocatoryId,
             ),
             talkUuidIndex: index('core_talkmodel_uuid').on(table.uuid),
+            startDateTimeIndex: index('core_talkmodel_start_date').on(
+                table.startDateTime,
+            ),
+            endDateTimeIndex: index('core_talkmodel_end_date').on(table.endDateTime),
         };
     },
 );

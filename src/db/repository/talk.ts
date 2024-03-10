@@ -1,25 +1,66 @@
 import {
+    SelectTalkSchema,
     SelectUserSchema,
     selectTalkInscriptionSchema,
     selectTalkSchema,
     talkInscriptionTable,
 } from '@/db/drizzle-schema';
+import { getRedisClient } from '@/redis-client';
 import { ApiError } from '@/schema/api-error/ref';
 import ZoomService from '@/service/ZoomService';
 import { YogaContext } from '@/types';
 import { eq } from 'drizzle-orm';
 
+const OPEN_TALK_CACHE_KEY = 'open_talk';
+
 export const TalkRepository = {
+    delCurrentOpenTalkCache: async () => {
+        const redisClient = await getRedisClient();
+        await redisClient.del(OPEN_TALK_CACHE_KEY);
+    },
+    setCurrentOpenTalkCache: async ({ id }: { id: number }) => {
+        const redisClient = await getRedisClient();
+        await redisClient.set(OPEN_TALK_CACHE_KEY, id);
+    },
+    getCurrentOpenTalkCache: async () => {
+        const redisClient = await getRedisClient();
+        return redisClient.get(OPEN_TALK_CACHE_KEY);
+    },
     getOpenTalk: async (DB: YogaContext['DB']) => {
-        const talk = await DB.query.talkTable.findFirst({
-            where: (etc, operators) => {
-                return operators.and(
-                    operators.lte(etc.startDateTime, new Date()),
-                    operators.gte(etc.endDateTime, new Date()),
-                    operators.isNull(etc.forOrganizationId),
-                );
-            },
-        });
+        const cachedId = await TalkRepository.getCurrentOpenTalkCache();
+        if (cachedId === '-1') {
+            return null;
+        }
+
+        let talk: SelectTalkSchema | undefined = undefined;
+        if (cachedId) {
+            talk = await DB.query.talkTable.findFirst({
+                where: (etc, operators) => {
+                    return operators.and(
+                        operators.eq(etc.id, parseInt(cachedId, 10)),
+                        operators.isNull(etc.forOrganizationId),
+                    );
+                },
+            });
+        }
+
+        if (!talk) {
+            talk = await DB.query.talkTable.findFirst({
+                where: (etc, operators) => {
+                    return operators.and(
+                        operators.lte(etc.startDateTime, new Date()),
+                        operators.gte(etc.endDateTime, new Date()),
+                        operators.isNull(etc.forOrganizationId),
+                    );
+                },
+            });
+
+            if (talk) {
+                await TalkRepository.setCurrentOpenTalkCache({ id: talk.id });
+            } else {
+                await TalkRepository.setCurrentOpenTalkCache({ id: -1 });
+            }
+        }
 
         if (!talk) {
             return null;

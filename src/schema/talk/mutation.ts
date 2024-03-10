@@ -112,10 +112,11 @@ schemaBuilder.mutationFields((t) => ({
             });
 
             const talk = await DB.insert(talkTable).values(values).returning().get();
-
             if (!talk) {
                 throw new Error('Ocurrió un error al crear la charla');
             }
+
+            TalkRepository.delCurrentOpenTalkCache();
 
             return talk;
         },
@@ -157,6 +158,8 @@ schemaBuilder.mutationFields((t) => ({
             if (!updatedTalk) {
                 throw new Error('Ocurrió un error al actualizar la charla');
             }
+
+            TalkRepository.delCurrentOpenTalkCache();
 
             return updatedTalk;
         },

@@ -45,13 +45,13 @@ type GetJoinUrlOptions = {
 };
 
 class ZoomService {
-    private static readonly TOKEN_KEY = 'zoom:access_token';
+    private static readonly REDIS_TOKEN_KEY = 'zoom:access_token';
 
     private async getToken(): Promise<GetTokenResponse> {
         const redisClient = await getRedisClient();
 
         // Try to get the token from Redis first
-        const cachedToken = await redisClient.get(ZoomService.TOKEN_KEY);
+        const cachedToken = await redisClient.get(ZoomService.REDIS_TOKEN_KEY);
         if (cachedToken) {
             return JSON.parse(cachedToken);
         }
@@ -70,7 +70,7 @@ class ZoomService {
 
         // Cache the token in Redis with an expiration time slightly less than 'expires_in' to ensure it's valid
         await redisClient.setEx(
-            ZoomService.TOKEN_KEY,
+            ZoomService.REDIS_TOKEN_KEY,
             response.expires_in - 60,
             JSON.stringify(response),
         );
