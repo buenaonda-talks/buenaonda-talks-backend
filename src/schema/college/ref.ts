@@ -11,7 +11,7 @@ schemaBuilder.objectType(CollegeRef, {
         id: t.exposeID('id'),
         name: t.exposeString('name'),
         hideFromSelection: t.exposeBoolean('hideFromSelection'),
-        communeid: t.exposeID('communeId', {
+        communeId: t.exposeID('communeId', {
             description: 'The commune where the college is located',
             nullable: true,
         }),

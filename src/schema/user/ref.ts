@@ -4,69 +4,14 @@ import {
     SelectTeacherSchema,
     SelectUserSchema,
     selectStudentSchema,
+    selectTeacherSchema,
     selectUsersSchema,
 } from '@/db/drizzle-schema';
 import { schemaBuilder } from '@/schema/schema-builder';
 import { TalkInscriptionRef } from '../talk';
 import { ApplicationRef } from '../scholarship-application';
 import { ScholarshipApplicationRepository } from '@/db/repository/scholarship-application';
-
-/* 
-export const userTable = sqliteTable(
-    'users_usermodel',
-    {
-        id: int('id').primaryKey({ autoIncrement: true }).notNull(),
-
-        sub: text('sub'),
-        email: text('email').notNull(),
-
-        dateJoined: int('date_joined', {
-            mode: 'timestamp_ms',
-        }).notNull(),
-
-        firstName: text('first_name').notNull(),
-        normalizedFirstName: text('normalized_first_name').notNull(),
-
-        lastName: text('last_name').notNull(),
-        normalizedLastName: text('normalized_last_name').notNull(),
-
-        phoneCode: text('phone_code'),
-        phoneNumber: text('phone_number'),
-        whatsappStatus: int('whatsapp_status').notNull().default(WhatsappStatus.UNKNOWN),
-
-        birthdate: int('birthdate', {
-            mode: 'timestamp',
-        }),
-
-        isSuperAdmin: int('isSuperAdmin', { mode: 'boolean' }).default(false),
-        isStudent: int('isStudent', { mode: 'boolean' }).default(false),
-        isTeacher: int('isTeacher', { mode: 'boolean' }).default(false),
-        isAdmin: int('isAdmin', { mode: 'boolean' }).default(false),
-        isBoardMember: int('isBoardMember', { mode: 'boolean' }).default(false),
-        isInterested: int('isInterested', { mode: 'boolean' }).default(false),
-
-        emailVerified: int('emailVerified', { mode: 'boolean' }).default(false),
-        imageUrl: text('imageUrl'),
-        username: text('username', { length: 64 }),
-        twoFactorEnabled: int('twoFactorEnabled', { mode: 'boolean' }),
-        unsafeMetadata: blob('unsafeMetadata'),
-        publicMetadata: blob('publicMetadata'),
-    },
-    (table) => {
-        return {
-            dateJoinedF5Deb65B: index('users_usermodel_date_joined_f5deb65b').on(
-                table.dateJoined,
-            ),
-            normalizedFirstNameIndex: index('users_normalized_first_name_index').on(
-                table.normalizedFirstName,
-            ),
-            normalizedLastNameIndex: index('users_normalized_last_name_index').on(
-                table.normalizedLastName,
-            ),
-            emailIndex: index('users_email_index').on(table.email),
-        };
-    },
-); */
+import { CollegeRef } from '../college';
 
 export const UserRef = schemaBuilder.objectRef<SelectUserSchema>('User');
 schemaBuilder.objectType(UserRef, {
@@ -160,6 +105,23 @@ schemaBuilder.objectType(UserRef, {
                 }
 
                 return selectStudentSchema.parse(student);
+            },
+        }),
+
+        teacherProfile: t.field({
+            type: TeacherRef,
+            resolve: async (parent, _args, { DB }) => {
+                const teacher = await DB.query.teacherProfileTable.findFirst({
+                    where: (field, { eq }) => {
+                        return eq(field.userId, parent.id);
+                    },
+                });
+
+                if (!teacher) {
+                    throw new Error('Teacher not found');
+                }
+
+                return selectTeacherSchema.parse(teacher);
             },
         }),
     }),
@@ -269,6 +231,36 @@ schemaBuilder.objectType(TeacherRef, {
                 }
 
                 return selectUsersSchema.parse(user);
+            },
+        }),
+
+        colleges: t.field({
+            type: [CollegeRef],
+            nullable: false,
+            resolve: async (parent, _args, { DB }) => {
+                const relations = await DB.query.collegeAndTeacherRelationTable.findMany({
+                    where: (fields, ops) => {
+                        return ops.eq(fields.teacherId, parent.id);
+                    },
+                    columns: {
+                        collegeId: true,
+                    },
+                });
+
+                if (relations.length === 0) {
+                    return [];
+                }
+
+                const colleges = await DB.query.collegeTable.findMany({
+                    where: (fields, ops) => {
+                        return ops.inArray(
+                            fields.id,
+                            relations.map((r) => r.collegeId),
+                        );
+                    },
+                });
+
+                return colleges;
             },
         }),
     }),

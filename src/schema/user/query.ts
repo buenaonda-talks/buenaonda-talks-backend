@@ -36,13 +36,19 @@ const UsersFilterRef = schemaBuilder.inputType('UsersFilter', {
     }),
 });
 
+const TeachersFilterRef = schemaBuilder.inputType('TeachersFilter', {
+    fields: (t) => ({
+        query: t.string({
+            required: false,
+        }),
+    }),
+});
+
 schemaBuilder.queryFields((t) => ({
     user: t.field({
         type: UserRef,
         nullable: true,
         resolve: async (parent, args, { DB, USER }) => {
-            // eslint-disable-next-line no-console
-            console.log('USER', USER);
             if (!USER) {
                 return null;
             }
@@ -364,6 +370,111 @@ schemaBuilder.queryFields((t) => ({
                         statement = sql`${statement} ${sql.join(joins, sql` `)}`;
                     }
 
+                    if (whereClauses.length > 0) {
+                        statement = sql`${statement} WHERE ${sql.join(whereClauses, sql` AND `)}`;
+                    }
+
+                    // Append ordering and limit as necessary
+                    statement = statement.append(
+                        sql` ORDER BY user.date_joined ${inverted ? sql`ASC` : sql`DESC`}`,
+                    );
+
+                    statement = statement.append(sql` LIMIT ${limit}`);
+
+                    const result = await DB.run(statement);
+                    return result.rows.map((row) => {
+                        return selectUsersSchema.parse({
+                            id: row.id,
+                            sub: row.sub,
+                            email: row.email,
+                            dateJoined: new Date(row.date_joined as string),
+                            firstName: row.first_name,
+                            normalizedFirstName: row.normalized_first_name,
+                            lastName: row.last_name,
+                            normalizedLastName: row.normalized_last_name,
+                            phoneCode: row.phone_code,
+                            phoneNumber: row.phone_number,
+                            whatsappStatus: row.whatsapp_status,
+                            birthdate: new Date(row.birthdate as string),
+                            isSuperAdmin: Boolean(row.isSuperAdmin),
+                            isStudent: Boolean(row.isStudent),
+                            isTeacher: Boolean(row.isTeacher),
+                            isAdmin: Boolean(row.isAdmin),
+                            isBoardMember: Boolean(row.isBoardMember),
+                            isInterested: Boolean(row.isInterested),
+                            emailVerified: Boolean(row.emailVerified),
+                            imageUrl: row.imageUrl,
+                            username: row.username,
+                            twoFactorEnabled: Boolean(row.twoFactorEnabled),
+                            unsafeMetadata: row.unsafeMetadata,
+                            publicMetadata: row.publicMetadata,
+                        });
+                    });
+                },
+            );
+        },
+    }),
+    teachers: t.connection({
+        type: UserRef,
+        args: {
+            filter: t.arg({
+                type: TeachersFilterRef,
+                required: true,
+            }),
+        },
+        authz: {
+            rules: ['IsAuthenticated', 'IsAdmin'],
+        },
+        resolve: (_, args, { DB }) => {
+            return resolveCursorConnection(
+                {
+                    args,
+                    toCursor: (user) => Math.floor(user.dateJoined.getTime()).toString(),
+                },
+                async ({
+                    before,
+                    after,
+                    limit,
+                    inverted,
+                }: ResolveCursorConnectionArgs) => {
+                    const { query } = args.filter;
+
+                    const whereClauses = [];
+                    const joins = [];
+
+                    // Base query
+                    let statement = sql`SELECT user.* FROM ${userTable} AS user`;
+
+                    joins.push(
+                        sql`INNER JOIN ${teacherProfileTable} AS teacher ON user.id = teacher.user_id`,
+                    );
+
+                    // Dynamic joins and conditions
+                    if (query) {
+                        const fuzzyQuery = `%${normalize(query)}%`;
+                        whereClauses.push(sql`
+                            (user.normalized_first_name LIKE ${fuzzyQuery}
+                            OR user.normalized_last_name LIKE ${fuzzyQuery}
+                            OR (user.normalized_first_name || ' ' || user.normalized_last_name) LIKE ${fuzzyQuery}
+                            OR user.email LIKE ${fuzzyQuery}
+                            OR user.phone_code LIKE ${fuzzyQuery}
+                            OR user.phone_number LIKE ${fuzzyQuery}
+                            OR (user.phone_code || user.phone_number) LIKE ${fuzzyQuery})
+                        `);
+                    }
+
+                    if (before) {
+                        whereClauses.push(sql`user.date_joined > ${before}`);
+                    }
+
+                    if (after) {
+                        whereClauses.push(sql`user.date_joined < ${after}`);
+                    }
+
+                    // Combine all parts into the final statement
+                    if (joins.length > 0) {
+                        statement = sql`${statement} ${sql.join(joins, sql` `)}`;
+                    }
                     if (whereClauses.length > 0) {
                         statement = sql`${statement} WHERE ${sql.join(whereClauses, sql` AND `)}`;
                     }
