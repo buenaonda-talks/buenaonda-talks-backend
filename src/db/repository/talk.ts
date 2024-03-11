@@ -12,23 +12,41 @@ import { YogaContext } from '@/types';
 import { eq } from 'drizzle-orm';
 
 const OPEN_TALK_CACHE_KEY = 'open_talk';
+const NO_UPCOMING_TALK_VALUE = -1;
 
 export const TalkRepository = {
     delCurrentOpenTalkCache: async () => {
         const redisClient = await getRedisClient();
         await redisClient.del(OPEN_TALK_CACHE_KEY);
     },
-    setCurrentOpenTalkCache: async ({ id }: { id: number }) => {
+    setCurrentOpenTalkCache: async ({
+        id,
+        startsAt,
+    }: {
+        id: number;
+        startsAt?: Date;
+    }) => {
         const redisClient = await getRedisClient();
-        await redisClient.set(OPEN_TALK_CACHE_KEY, id);
+
+        if (!startsAt) {
+            await redisClient.set(OPEN_TALK_CACHE_KEY, id.toString());
+        }
+
+        if (startsAt) {
+            await redisClient.setEx(
+                OPEN_TALK_CACHE_KEY,
+                new Date(startsAt).getTime() - new Date().getTime(),
+                id.toString(),
+            );
+        }
     },
     getCurrentOpenTalkCache: async () => {
         const redisClient = await getRedisClient();
         return redisClient.get(OPEN_TALK_CACHE_KEY);
     },
-    getOpenTalk: async (DB: YogaContext['DB']) => {
+    getOpenTalkCached: async (DB: YogaContext['DB']) => {
         const cachedId = await TalkRepository.getCurrentOpenTalkCache();
-        if (cachedId === '-1') {
+        if (cachedId === NO_UPCOMING_TALK_VALUE.toString()) {
             return null;
         }
 
@@ -56,11 +74,33 @@ export const TalkRepository = {
             });
 
             if (talk) {
-                await TalkRepository.setCurrentOpenTalkCache({ id: talk.id });
+                await TalkRepository.setCurrentOpenTalkCache({
+                    id: talk.id,
+                    startsAt: talk.startDateTime,
+                });
             } else {
-                await TalkRepository.setCurrentOpenTalkCache({ id: -1 });
+                await TalkRepository.setCurrentOpenTalkCache({
+                    id: NO_UPCOMING_TALK_VALUE,
+                });
             }
         }
+
+        if (!talk) {
+            return null;
+        }
+
+        return selectTalkSchema.parse(talk);
+    },
+    getOpenTalk: async (DB: YogaContext['DB']) => {
+        const talk = await DB.query.talkTable.findFirst({
+            where: (etc, operators) => {
+                return operators.and(
+                    operators.lte(etc.startDateTime, new Date()),
+                    operators.gte(etc.endDateTime, new Date()),
+                    operators.isNull(etc.forOrganizationId),
+                );
+            },
+        });
 
         if (!talk) {
             return null;
