@@ -23,7 +23,12 @@ schemaBuilder.queryFields((t) => ({
         type: TalkRef,
         nullable: true,
         resolve: async (parent, args, { DB }) => {
-            const result = await TalkRepository.getOpenTalk(DB);
+            const talkOpen = await TalkRepository.getOpenTalk(DB);
+            const talkUpcoming = !talkOpen
+                ? await TalkRepository.getUpcomingTalk(DB)
+                : null;
+
+            const result = talkOpen || talkUpcoming;
 
             if (!result) {
                 return null;

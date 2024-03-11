@@ -297,7 +297,7 @@ schemaBuilder.queryFields((t) => ({
 
             // Check for Talks
             const talkOpen = await TalkRepository.getOpenTalk(DB);
-            const talkUpcoming = talkOpen
+            const talkUpcoming = !talkOpen
                 ? await TalkRepository.getUpcomingTalk(DB)
                 : null;
 
