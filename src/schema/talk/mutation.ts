@@ -116,7 +116,7 @@ schemaBuilder.mutationFields((t) => ({
                 throw new Error('Ocurrió un error al crear la charla');
             }
 
-            TalkRepository.delCurrentOpenTalkCache();
+            await TalkRepository.delCurrentOpenTalkCache();
 
             return talk;
         },
@@ -159,7 +159,7 @@ schemaBuilder.mutationFields((t) => ({
                 throw new Error('Ocurrió un error al actualizar la charla');
             }
 
-            TalkRepository.delCurrentOpenTalkCache();
+            await TalkRepository.delCurrentOpenTalkCache();
 
             return updatedTalk;
         },
