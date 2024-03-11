@@ -4,24 +4,16 @@ import { getRedisClient } from '@/redis-client';
 class ZoomAPI {
     private static readonly ZOOM_BASE_URL = 'https://zoom.us';
 
-    public static getAuthHeader(clientId: string, clientSecret: string): HeadersInit {
+    public static getAuthBasicString(clientId: string, clientSecret: string): string {
         const credentials = `${clientId}:${clientSecret}`;
-        const encodedCredentials = Buffer.from(credentials).toString('base64');
-        return {
-            Authorization: `Basic ${encodedCredentials}`,
-            'Content-Type': 'application/json',
-        };
+        const asBase64 = Buffer.from(credentials).toString('base64');
+        return `Basic ${asBase64}`;
     }
 
-    public static async postRequest<T>(
-        endpoint: string,
-        headers: HeadersInit,
-        body: Record<string, unknown>,
-    ): Promise<T> {
+    public static async postRequest<T>(endpoint: string, init: RequestInit): Promise<T> {
         const response = await fetch(`${this.ZOOM_BASE_URL}${endpoint}`, {
             method: 'POST',
-            headers,
-            body: JSON.stringify(body),
+            ...init,
         });
 
         if (!response.ok) {
@@ -56,17 +48,19 @@ class ZoomService {
             return JSON.parse(cachedToken);
         }
 
-        const headers = ZoomAPI.getAuthHeader(env.ZOOM.CLIENT_ID, env.ZOOM.CLIENT_SECRET);
-        const body = {
-            grant_type: 'account_credentials',
-            account_id: env.ZOOM.ACCOUNT_ID,
-        };
-
-        const response = await ZoomAPI.postRequest<GetTokenResponse>(
-            '/oauth/token',
-            headers,
-            body,
-        );
+        const response = await ZoomAPI.postRequest<GetTokenResponse>('/oauth/token', {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                Authorization: ZoomAPI.getAuthBasicString(
+                    env.ZOOM.CLIENT_ID,
+                    env.ZOOM.CLIENT_SECRET,
+                ),
+            },
+            body: new URLSearchParams({
+                grant_type: 'account_credentials',
+                account_id: env.ZOOM.ACCOUNT_ID,
+            }),
+        });
 
         // Cache the token in Redis with an expiration time slightly less than 'expires_in' to ensure it's valid
         await redisClient.setEx(
@@ -80,10 +74,9 @@ class ZoomService {
 
     public async getJoinUrl({ user, meetingId }: GetJoinUrlOptions): Promise<string> {
         const token = await this.getToken();
-        const headers = {
-            Authorization: `Bearer ${token.access_token}`,
-            'Content-Type': 'application/json',
-        };
+        if (!token || !token.access_token) {
+            throw new Error('No Zoom access token');
+        }
 
         const body = {
             first_name: user.firstName || 'Estudiante',
@@ -94,8 +87,13 @@ class ZoomService {
 
         const response = await ZoomAPI.postRequest<RegistrantsResponse>(
             `/v2/meetings/${meetingId}/registrants`,
-            headers,
-            body,
+            {
+                headers: {
+                    Authorization: `Bearer ${token.access_token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(body),
+            },
         );
 
         return response.join_url;
