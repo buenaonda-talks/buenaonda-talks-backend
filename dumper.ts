@@ -107,10 +107,6 @@ async function exportDatabaseData(dbPath: string, outputPath: string) {
                             studentId,
                         );
 
-                        if (!studentData.user_id) {
-                            console.log('studentId:', studentId);
-                        }
-
                         values.push(studentData.user_id);
                         continue;
                     }
