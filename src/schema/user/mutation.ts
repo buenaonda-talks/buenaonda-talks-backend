@@ -50,10 +50,6 @@ schemaBuilder.mutationFields((t) => ({
                 throw new Error('User is already a student');
             }
 
-            if (!args.collegeId && !args.newCollegeName) {
-                throw new Error('CollegeId or newCollegeName is required');
-            }
-
             if (args.collegeId && args.newCollegeName) {
                 throw new Error('Only one of collegeId or newCollegeName is required');
             }
