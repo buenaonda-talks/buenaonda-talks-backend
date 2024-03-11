@@ -11,8 +11,8 @@ import {
     resolveCursorConnection,
 } from '@pothos/plugin-relay';
 import { sql } from 'drizzle-orm';
-import { normalize } from 'path';
 import { studentProfileTable, userTable } from '@/db/drizzle-schema';
+import { normalize } from '@/utils';
 
 const ScholarshipsFilterRef = schemaBuilder.inputType('ScholarshipsFilter', {
     fields: (t) => ({
