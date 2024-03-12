@@ -70,18 +70,18 @@ schemaBuilder.queryFields((t) => ({
                     if (query) {
                         const fuzzyQuery = `%${normalize(query)}%`;
                         joins.push(sql`
-                            INNER JOIN ${userTable} AS user ON application.user_id = user.id
+                            INNER JOIN ${userTable} AS qs_user ON application.user_id = qs_user.id
                         `);
                         userHasBeenJoined = true;
 
                         whereClauses.push(sql`
-                            (user.normalized_first_name LIKE ${fuzzyQuery}
-                            OR user.normalized_last_name LIKE ${fuzzyQuery}
-                            OR (user.normalized_first_name || ' ' || user.normalized_last_name) LIKE ${fuzzyQuery}
-                            OR user.email LIKE ${fuzzyQuery}
-                            OR user.phone_code LIKE ${fuzzyQuery}
-                            OR user.phone_number LIKE ${fuzzyQuery}
-                            OR (user.phone_code || user.phone_number) LIKE ${fuzzyQuery})
+                            (qs_user.normalized_first_name LIKE ${fuzzyQuery}
+                            OR qs_user.normalized_last_name LIKE ${fuzzyQuery}
+                            OR (qs_user.normalized_first_name || ' ' || qs_user.normalized_last_name) LIKE ${fuzzyQuery}
+                            OR qs_user.email LIKE ${fuzzyQuery}
+                            OR qs_user.phone_code LIKE ${fuzzyQuery}
+                            OR qs_user.phone_number LIKE ${fuzzyQuery}
+                            OR (qs_user.phone_code || qs_user.phone_number) LIKE ${fuzzyQuery})
                         `);
                     }
 
@@ -100,7 +100,7 @@ schemaBuilder.queryFields((t) => ({
                     if (collegeIDs && collegeIDs.length > 0) {
                         if (!userHasBeenJoined) {
                             joins.push(sql`
-                                    INNER JOIN ${userTable} AS user ON application.user_id = user.id
+                                    INNER JOIN ${userTable} AS qs_user ON application.user_id = qs_user.id
                                 `);
                             userHasBeenJoined = true;
                         }
@@ -162,11 +162,11 @@ schemaBuilder.queryFields((t) => ({
                         return selectApplicationSchema.parse({
                             id: row.id,
                             acceptedTerms:
-                                typeof row.accepted_terms === 'number'
-                                    ? row.accepted_terms === 1
+                                typeof row.accepted_terms === 'boolean'
+                                    ? row.accepted_terms
                                     : null,
                             termsAcceptanceDate:
-                                typeof row.terms_acceptance_date === 'number'
+                                typeof row.terms_acceptance_date === 'string'
                                     ? new Date(row.terms_acceptance_date)
                                     : null,
                             formId: row.form_id,
