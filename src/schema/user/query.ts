@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { schemaBuilder } from '@/schema/schema-builder';
 import { UserRef } from './ref';
 import {
@@ -6,6 +7,7 @@ import {
 } from '@pothos/plugin-relay';
 import { sql } from 'drizzle-orm';
 import {
+    SelectUserSchema,
     collegeAndTeacherRelationTable,
     selectUsersSchema,
     studentProfileTable,
@@ -13,6 +15,7 @@ import {
     userTable,
 } from '@/db/drizzle-schema';
 import { normalize } from '@/utils';
+import { TeacherRepository } from '@/db/repository/teacher';
 
 const StudentsFilterRef = schemaBuilder.inputType('StudentsFilter', {
     fields: (t) => ({
@@ -177,7 +180,7 @@ schemaBuilder.queryFields((t) => ({
 
                     const result = await DB.execute(statement);
 
-                    return result.map((row) => {
+                    return result.map((row: any) => {
                         return selectUsersSchema.parse({
                             id: row.id,
                             sub: row.sub,
@@ -307,7 +310,7 @@ schemaBuilder.queryFields((t) => ({
                     statement = statement.append(sql` LIMIT ${limit}`);
 
                     const result = await DB.execute(statement);
-                    return result.map((row) => {
+                    return result.map((row: any) => {
                         return selectUsersSchema.parse({
                             id: row.id,
                             sub: row.sub,
@@ -356,7 +359,7 @@ schemaBuilder.queryFields((t) => ({
                     const joins = [];
 
                     // Base query
-                    let statement = sql`SELECT user.* FROM ${userTable} AS qs_user`;
+                    let statement = sql`SELECT qs_user.* FROM ${userTable} AS qs_user`;
 
                     joins.push(
                         sql`INNER JOIN ${studentProfileTable} AS student ON qs_user.id = student.user_id`,
@@ -389,7 +392,7 @@ schemaBuilder.queryFields((t) => ({
                     statement = statement.append(sql` LIMIT ${limit}`);
 
                     const result = await DB.execute(statement);
-                    return result.map((row) => {
+                    const users = result.map((row: any) => {
                         return selectUsersSchema.parse({
                             id: row.id,
                             sub: row.sub,
@@ -416,7 +419,9 @@ schemaBuilder.queryFields((t) => ({
                             unsafeMetadata: row.unsafeMetadata,
                             publicMetadata: row.publicMetadata,
                         });
-                    });
+                    }) as SelectUserSchema[];
+
+                    return users;
                 },
             );
         },
@@ -498,7 +503,7 @@ schemaBuilder.queryFields((t) => ({
                     statement = statement.append(sql` LIMIT ${limit}`);
 
                     const result = await DB.execute(statement);
-                    return result.map((row) => {
+                    return result.map((row: any) => {
                         return selectUsersSchema.parse({
                             id: row.id,
                             sub: row.sub,
@@ -528,6 +533,43 @@ schemaBuilder.queryFields((t) => ({
                     });
                 },
             );
+        },
+    }),
+    teacherUserById: t.field({
+        type: UserRef,
+        args: {
+            id: t.arg({
+                type: 'Int',
+                required: true,
+            }),
+        },
+        authz: {
+            rules: ['IsAuthenticated', 'IsAdmin'],
+        },
+        resolve: async (_, { id }, { DB }) => {
+            const exists = await TeacherRepository.exists({
+                DB,
+                forUserId: id,
+            });
+            if (!exists) {
+                throw new Error('Teacher not found');
+            }
+
+            const user = await DB.query.userTable
+                .findFirst({
+                    where: (field, { eq }) => {
+                        return eq(field.id, id);
+                    },
+                })
+                .then((user) => {
+                    return user;
+                });
+
+            if (!user) {
+                throw new Error('User not found');
+            }
+
+            return selectUsersSchema.parse(user);
         },
     }),
 }));
