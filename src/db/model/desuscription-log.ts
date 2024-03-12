@@ -1,17 +1,21 @@
-import { sqliteTable, index, int } from 'drizzle-orm/sqlite-core';
+import { pgTable, index, integer, serial } from 'drizzle-orm/pg-core';
 import { studentProfileTable, userTable } from './user';
 import { TIMESTAMP_FIELDS } from '@/db/shared';
 
-export const desuscriptionVisitLog = sqliteTable(
+export const desuscriptionVisitLog = pgTable(
     'generations_desuscriptionpagevisitmodel',
     {
-        id: int('id').primaryKey({ autoIncrement: true }).notNull(),
-        userId: int('user_id')
+        id: serial('id').primaryKey(),
+        userId: integer('user_id')
             .notNull()
-            .references(() => userTable.id),
-        studentId: int('student_id')
+            .references(() => userTable.id, {
+                onDelete: 'cascade',
+            }),
+        studentId: integer('student_id')
             .notNull()
-            .references(() => studentProfileTable.id),
+            .references(() => studentProfileTable.id, {
+                onDelete: 'cascade',
+            }),
         ...TIMESTAMP_FIELDS,
     },
     (table) => {

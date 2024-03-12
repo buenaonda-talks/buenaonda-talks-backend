@@ -111,7 +111,10 @@ schemaBuilder.mutationFields((t) => ({
                 uuid: uuidv4(),
             });
 
-            const talk = await DB.insert(talkTable).values(values).returning().get();
+            const talk = await DB.insert(talkTable)
+                .values(values)
+                .returning()
+                .then((res) => res[0]);
             if (!talk) {
                 throw new Error('Ocurrió un error al crear la charla');
             }
@@ -153,7 +156,7 @@ schemaBuilder.mutationFields((t) => ({
                 .set(values)
                 .where(eq(talkTable.id, args.id))
                 .returning()
-                .get();
+                .then((res) => res[0]);
 
             if (!updatedTalk) {
                 throw new Error('Ocurrió un error al actualizar la charla');

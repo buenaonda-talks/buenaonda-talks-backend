@@ -2,6 +2,7 @@
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 import * as fs from 'fs/promises';
+import { format } from 'date-fns';
 
 async function exportDatabaseData(dbPath: string, outputPath: string) {
     const db = await open({
@@ -69,32 +70,74 @@ async function exportDatabaseData(dbPath: string, outputPath: string) {
             const unorderedRows = await db.all(`SELECT * FROM ${tableName}`);
 
             if (tablesWithDisabledForeignKeys.includes(tableName)) {
-                outputData += `PRAGMA foreign_keys=off;\n`;
+                outputData += `ALTER TABLE ${tableName} DISABLE TRIGGER ALL;\n`;
             }
 
-            outputData += `BEGIN TRANSACTION;\n`;
-
-            for (const row of unorderedRows) {
-                const keys = Object.keys(row).filter((key) => {
-                    if (tableName === 'users_usermodel') {
-                        if (usersColumnsToIgnore.includes(key)) {
-                            return false;
-                        }
-
-                        return true;
+            const keys = Object.keys(unorderedRows[0]).filter((key) => {
+                if (tableName === 'users_usermodel') {
+                    if (usersColumnsToIgnore.includes(key)) {
+                        return false;
                     }
 
                     return true;
-                });
-
-                if (keys.includes('student_id')) {
-                    keys.push('user_id');
                 }
+
+                return true;
+            });
+
+            if (keys.includes('student_id')) {
+                keys.push('user_id');
+            }
+
+            if (tableName === 'generations_teachermodel') {
+                keys.push('is_verified');
+                keys.push('has_signed_up');
+            }
+
+            outputData += `BEGIN;\n`;
+            outputData += `DELETE FROM ${tableName};\n`;
+            outputData += `INSERT INTO ${tableName} (`;
+
+            outputData += keys.map((key) => `"${key}"`).join(', ');
+
+            outputData += `)\nVALUES\n`;
+
+            for (let i = 0; i < unorderedRows.length; i++) {
+                const row = unorderedRows[i];
 
                 const values = [];
                 for (let i = 0; i < keys.length; i++) {
                     const key = keys[i];
                     const value = row[key];
+
+                    if (
+                        key === 'hide_from_selection' ||
+                        key === 'commits_to_participate' ||
+                        key === 'is_visible' ||
+                        key === 'assisted' ||
+                        key === 'allows_whatsapp' ||
+                        key === 'is_withdrawable' ||
+                        key === 'discord_link_was_clicked' ||
+                        key === 'is_required' ||
+                        key === 'accepted_terms' ||
+                        key === 'resigned' ||
+                        key === 'completed_profile' ||
+                        key === 'asked_to_renew' ||
+                        key === 'is_important' ||
+                        key === 'already_created_by_signup' ||
+                        key === 'devf_added_artificially' ||
+                        key === 'platzi_completed_mandatory_courses' ||
+                        key === 'is_student' ||
+                        key === 'has_unsuscribed' ||
+                        key === 'for_aylin' ||
+                        key === 'aylin_called' ||
+                        key === 'has_clicked_whatsapp_link' ||
+                        key === 'initiated_session_with_phone_token'
+                    ) {
+                        values.push(value === 0 ? 'FALSE' : 'TRUE');
+                        continue;
+                    }
+
                     if (key === 'user_id' && !value) {
                         const studentId = row['student_id'];
                         if (studentId === null || studentId === undefined) {
@@ -111,6 +154,11 @@ async function exportDatabaseData(dbPath: string, outputPath: string) {
                         continue;
                     }
 
+                    if (key === 'is_verified' || key === 'has_signed_up') {
+                        values.push('TRUE');
+                        continue;
+                    }
+
                     if (value === null || value === undefined) {
                         values.push('NULL');
                         continue;
@@ -120,14 +168,13 @@ async function exportDatabaseData(dbPath: string, outputPath: string) {
                         typeof value === 'string' &&
                         value.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/)
                     ) {
-                        values.push(new Date(value).getTime());
+                        values.push(`'${format(value, "yyyy-MM-dd'T'HH:mm:ss")}'`);
                         continue;
                     }
 
                     if (typeof value === 'string' && value.match(/^\d{4}-\d{2}-\d{2}/)) {
                         const date = new Date(value);
-                        const seconds = Math.floor(date.getTime() / 1000);
-                        values.push(seconds);
+                        values.push(`'${format(date, 'yyyy-MM-dd')}'`);
                         continue;
                     }
 
@@ -137,23 +184,31 @@ async function exportDatabaseData(dbPath: string, outputPath: string) {
                     }
 
                     if (typeof value === 'boolean') {
-                        values.push(value ? 1 : 0);
+                        values.push(value ? 'TRUE' : 'FALSE');
                         continue;
                     }
 
                     values.push(value);
                 }
 
-                outputData += `INSERT INTO ${tableName} (${keys
-                    .map((key) => `"${key}"`)
-                    .join(', ')}) VALUES (${values.join(', ')});\n`;
+                outputData += `(${values.join(', ')})`;
+
+                if (i < unorderedRows.length - 1) {
+                    outputData += ',\n';
+                } else {
+                    outputData += ';\n';
+                }
             }
 
             outputData += `COMMIT;\n`;
 
             if (tablesWithDisabledForeignKeys.includes(tableName)) {
-                outputData += `PRAGMA foreign_keys=on;\n`;
+                outputData += `ALTER TABLE ${tableName} ENABLE TRIGGER ALL;\n`;
             }
+        }
+
+        for (const tableName of orderedTablesToExport) {
+            outputData += `SELECT setval(pg_get_serial_sequence('${tableName}', 'id'), coalesce(max(id), 1), false) FROM ${tableName};\n`;
         }
 
         await fs.writeFile(outputPath, outputData);

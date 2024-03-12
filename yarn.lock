@@ -6578,6 +6578,11 @@ postcss@^8.4.23:
     picocolors "^1.0.0"
     source-map-js "^1.0.2"
 
+postgres@^3.4.3:
+  version "3.4.3"
+  resolved "https://registry.yarnpkg.com/postgres/-/postgres-3.4.3.tgz#52a0712cd6c2dae5e9f8c35b5c7b33434caa66ed"
+  integrity sha512-iHJn4+M9vbTdHSdDzNkC0crHq+1CUdFhx+YqCE+SqWxPjm+Zu63jq7yZborOBF64c8pc58O5uMudyL1FQcHacA==
+
 postmark@^4.0.2:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/postmark/-/postmark-4.0.2.tgz#0c0410ac427d85f2a43454360cf8d07e0fbda317"

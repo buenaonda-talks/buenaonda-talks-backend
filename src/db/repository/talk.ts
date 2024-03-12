@@ -170,7 +170,7 @@ export const TalkRepository = {
                 userId: userId,
             })
             .returning()
-            .get();
+            .then((res) => res[0]);
 
         return selectTalkInscriptionSchema.parse(newInscription);
     },

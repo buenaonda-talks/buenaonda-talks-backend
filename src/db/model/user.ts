@@ -1,4 +1,13 @@
-import { blob, index, int, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import {
+    index,
+    integer,
+    pgTable,
+    serial,
+    boolean,
+    timestamp,
+    json,
+    text,
+} from 'drizzle-orm/pg-core';
 import { TIMESTAMP_FIELDS } from '@/db/shared';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
@@ -23,17 +32,15 @@ export enum WhatsappStatus {
 
 export type SelectUserSchema = z.infer<typeof selectUsersSchema>;
 
-export const userTable = sqliteTable(
+export const userTable = pgTable(
     'users_usermodel',
     {
-        id: int('id').primaryKey({ autoIncrement: true }).notNull(),
+        id: serial('id').primaryKey(),
 
         sub: text('sub'),
         email: text('email').notNull(),
 
-        dateJoined: int('date_joined', {
-            mode: 'timestamp_ms',
-        }).notNull(),
+        dateJoined: timestamp('date_joined').notNull(),
 
         firstName: text('first_name').notNull(),
         normalizedFirstName: text('normalized_first_name').notNull(),
@@ -43,25 +50,25 @@ export const userTable = sqliteTable(
 
         phoneCode: text('phone_code'),
         phoneNumber: text('phone_number'),
-        whatsappStatus: int('whatsapp_status').notNull().default(WhatsappStatus.UNKNOWN),
+        whatsappStatus: integer('whatsapp_status')
+            .notNull()
+            .default(WhatsappStatus.UNKNOWN),
 
-        birthdate: int('birthdate', {
-            mode: 'timestamp',
-        }),
+        birthdate: timestamp('birthdate'),
 
-        isSuperAdmin: int('isSuperAdmin', { mode: 'boolean' }).default(false),
-        isStudent: int('isStudent', { mode: 'boolean' }).default(false),
-        isTeacher: int('isTeacher', { mode: 'boolean' }).default(false),
-        isAdmin: int('isAdmin', { mode: 'boolean' }).default(false),
-        isBoardMember: int('isBoardMember', { mode: 'boolean' }).default(false),
-        isInterested: int('isInterested', { mode: 'boolean' }).default(false),
+        isSuperAdmin: boolean('isSuperAdmin').default(false),
+        isStudent: boolean('isStudent').default(false),
+        isTeacher: boolean('isTeacher').default(false),
+        isAdmin: boolean('isAdmin').default(false),
+        isBoardMember: boolean('isBoardMember').default(false),
+        isInterested: boolean('isInterested').default(false),
 
-        emailVerified: int('emailVerified', { mode: 'boolean' }).default(false),
+        emailVerified: boolean('emailVerified').default(false),
         imageUrl: text('imageUrl'),
-        username: text('username', { length: 64 }),
-        twoFactorEnabled: int('twoFactorEnabled', { mode: 'boolean' }),
-        unsafeMetadata: blob('unsafeMetadata'),
-        publicMetadata: blob('publicMetadata'),
+        username: text('username'),
+        twoFactorEnabled: boolean('twoFactorEnabled'),
+        unsafeMetadata: json('unsafeMetadata'),
+        publicMetadata: json('publicMetadata'),
     },
     (table) => {
         return {
@@ -82,81 +89,70 @@ export const userTable = sqliteTable(
 export const selectUsersSchema = createSelectSchema(userTable);
 export const insertUsersSchema = createInsertSchema(userTable);
 
-export const boardMemberTable = sqliteTable('generations_boardmembermodel', {
-    id: int('id').primaryKey({ autoIncrement: true }).notNull(),
-    createdOn: int('created_on').notNull(),
-    modifiedOn: int('modified_on').notNull(),
-    userId: int('user_id')
+export const boardMemberTable = pgTable('generations_boardmembermodel', {
+    id: serial('id').primaryKey(),
+    createdOn: integer('created_on').notNull(),
+    modifiedOn: integer('modified_on').notNull(),
+    userId: integer('user_id')
         .notNull()
-        .references(() => userTable.id),
+        .references(() => userTable.id, {
+            onDelete: 'cascade',
+        }),
 });
 
-export const studentProfileTable = sqliteTable(
+export const studentProfileTable = pgTable(
     'generations_studentmodel',
     {
-        id: int('id').primaryKey({ autoIncrement: true }).notNull(),
-        allowsWhatsapp: int('allows_whatsapp'),
-        discordLinkWasClicked: int('discord_link_was_clicked', {
-            mode: 'boolean',
-        }).notNull(),
-        discordLinkClickDate: int('discord_link_click_date', {
-            mode: 'timestamp_ms',
-        }),
+        id: serial('id').primaryKey(),
+        allowsWhatsapp: boolean('allows_whatsapp'),
+        discordLinkWasClicked: boolean('discord_link_was_clicked').notNull(),
+        discordLinkClickDate: timestamp('discord_link_click_date'),
         nationality: text('nationality'),
         observations: text('observations'),
-        userId: int('user_id')
+        userId: integer('user_id')
             .notNull()
-            .references(() => userTable.id),
+            .references(() => userTable.id, {
+                onDelete: 'cascade',
+            }),
         specialization: text('specialization'),
-        completedProfile: int('completed_profile', {
-            mode: 'boolean',
-        }).notNull(),
-        alreadyCreatedBySignup: int('already_created_by_signup', {
-            mode: 'boolean',
-        }).notNull(),
-        signupDatetime: int('signup_datetime', {
-            mode: 'timestamp_ms',
+        completedProfile: boolean('completed_profile').notNull(),
+        alreadyCreatedBySignup: boolean('already_created_by_signup').notNull(),
+        signupDatetime: timestamp('signup_datetime'),
+        collegeId: integer('college_id').references(() => collegeTable.id, {
+            onDelete: 'cascade',
         }),
-        collegeId: int('college_id').references(() => collegeTable.id),
-        organizationId: int('organization_id').references(() => organizationTable.id),
-        expectsToDoNextYear: int('expects_to_do_next_year'),
-        gender: int('gender'),
-        grade: int('grade'),
-        timeItTakesToSchool: int('time_it_takes_to_school'),
-        willTakePaesTest: int('will_take_paes_test'),
-        isStudent: int('is_student', {
-            mode: 'boolean',
-        }).notNull(),
+        organizationId: integer('organization_id').references(
+            () => organizationTable.id,
+            {
+                onDelete: 'cascade',
+            },
+        ),
+        expectsToDoNextYear: integer('expects_to_do_next_year'),
+        gender: integer('gender'),
+        grade: integer('grade'),
+        timeItTakesToSchool: integer('time_it_takes_to_school'),
+        willTakePaesTest: integer('will_take_paes_test'),
+        isStudent: boolean('is_student').notNull(),
         uuid: text('uuid').notNull(),
-        hasUnsuscribed: int('has_unsuscribed', {
-            mode: 'boolean',
-        }).notNull(),
-        unsubscriptionDate: int('unsubscription_date', {
-            mode: 'timestamp_ms',
-        }),
-        unsubscriptionReason: int('unsubscription_reason'),
+        hasUnsuscribed: boolean('has_unsuscribed').notNull(),
+        unsubscriptionDate: timestamp('unsubscription_date'),
+        unsubscriptionReason: integer('unsubscription_reason'),
         unsubscriptionText: text('unsubscription_text'),
-        convocatoryId: int('convocatory_id').references(() => convocatoryTable.id),
-        communeId: int('commune_id').references(() => communeTable.id),
-        forAylin: int('for_aylin', {
-            mode: 'boolean',
-        }).notNull(),
-        aylinCalled: int('aylin_called', {
-            mode: 'boolean',
-        }).notNull(),
-        aylinCalledDate: int('aylin_called_date', {
-            mode: 'timestamp_ms',
+        convocatoryId: integer('convocatory_id').references(() => convocatoryTable.id, {
+            onDelete: 'cascade',
         }),
-        hasClickedWhatsappLink: int('has_clicked_whatsapp_link', {
-            mode: 'boolean',
-        }).notNull(),
-        whatsappLinkClickDate: int('whatsapp_link_click_date', {
-            mode: 'timestamp_ms',
+        communeId: integer('commune_id').references(() => communeTable.id, {
+            onDelete: 'cascade',
         }),
+        forAylin: boolean('for_aylin').notNull(),
+        aylinCalled: boolean('aylin_called').notNull(),
+        aylinCalledDate: timestamp('aylin_called_date'),
+        hasClickedWhatsappLink: boolean('has_clicked_whatsapp_link').notNull(),
+        whatsappLinkClickDate: timestamp('whatsapp_link_click_date'),
         note: text('note'),
-        initiatedSessionWithPhoneToken: int('initiated_session_with_phone_token', {
-            mode: 'boolean',
-        }).notNull(),
+        initiatedSessionWithPhoneToken: boolean(
+            'initiated_session_with_phone_token',
+        ).notNull(),
         ...TIMESTAMP_FIELDS,
     },
     (table) => {
@@ -186,35 +182,37 @@ export type SelectStudentSchema = z.infer<typeof selectStudentSchema>;
 export const insertStudentSchema = createInsertSchema(studentProfileTable);
 export type InsertStudentSchema = z.infer<typeof insertStudentSchema>;
 
-export const interestedProfileTable = sqliteTable('generations_interestedmodel', {
-    id: int('id').primaryKey({ autoIncrement: true }).notNull(),
-    createdOn: int('created_on').notNull(),
-    modifiedOn: int('modified_on').notNull(),
-    rol: int('rol').notNull(),
-    userId: int('user_id')
+export const interestedProfileTable = pgTable('generations_interestedmodel', {
+    id: serial('id').primaryKey(),
+    createdOn: integer('created_on').notNull(),
+    modifiedOn: integer('modified_on').notNull(),
+    rol: text('rol').notNull(),
+    userId: integer('user_id')
         .notNull()
-        .references(() => userTable.id),
+        .references(() => userTable.id, {
+            onDelete: 'cascade',
+        }),
 });
 
-export const adminProfileTable = sqliteTable('generations_administratormodel', {
-    id: int('id').primaryKey({ autoIncrement: true }).notNull(),
-    userId: int('user_id')
+export const adminProfileTable = pgTable('generations_administratormodel', {
+    id: serial('id').primaryKey(),
+    userId: integer('user_id')
         .notNull()
-        .references(() => userTable.id),
+        .references(() => userTable.id, {
+            onDelete: 'cascade',
+        }),
     ...TIMESTAMP_FIELDS,
 });
 
-export const teacherProfileTable = sqliteTable('generations_teachermodel', {
-    id: int('id').primaryKey({ autoIncrement: true }).notNull(),
-    userId: int('user_id')
+export const teacherProfileTable = pgTable('generations_teachermodel', {
+    id: serial('id').primaryKey(),
+    userId: integer('user_id')
         .notNull()
-        .references(() => userTable.id),
-    isVerified: int('is_verified', {
-        mode: 'boolean',
-    }).notNull(),
-    hasSignedUp: int('has_signed_up', {
-        mode: 'boolean',
-    }).notNull(),
+        .references(() => userTable.id, {
+            onDelete: 'cascade',
+        }),
+    isVerified: boolean('is_verified').notNull(),
+    hasSignedUp: boolean('has_signed_up').notNull(),
     ...TIMESTAMP_FIELDS,
 });
 

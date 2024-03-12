@@ -119,7 +119,7 @@ schemaBuilder.queryFields((t) => ({
             return resolveCursorConnection(
                 {
                     args,
-                    toCursor: (user) => Math.floor(user.dateJoined.getTime()).toString(),
+                    toCursor: (user) => user.dateJoined.toString(),
                 },
                 async ({
                     before,
@@ -130,35 +130,36 @@ schemaBuilder.queryFields((t) => ({
                     const { query } = args.filter;
 
                     const whereClauses = [];
-                    const joins = [];
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const joins: any[] = [];
 
                     // Base query
-                    let statement = sql`SELECT user.* FROM ${userTable} AS user`;
-
-                    joins.push(
-                        sql`INNER JOIN ${studentProfileTable} AS student ON user.id = student.user_id`,
-                    );
+                    let statement = sql`SELECT qs_user.* FROM ${userTable} AS qs_user`;
 
                     // Dynamic joins and conditions
                     if (query) {
                         const fuzzyQuery = `%${normalize(query)}%`;
                         whereClauses.push(sql`
-                            (user.normalized_first_name LIKE ${fuzzyQuery}
-                            OR user.normalized_last_name LIKE ${fuzzyQuery}
-                            OR (user.normalized_first_name || ' ' || user.normalized_last_name) LIKE ${fuzzyQuery}
-                            OR user.email LIKE ${fuzzyQuery}
-                            OR user.phone_code LIKE ${fuzzyQuery}
-                            OR user.phone_number LIKE ${fuzzyQuery}
-                            OR (user.phone_code || user.phone_number) LIKE ${fuzzyQuery})
+                            (qs_user.normalized_first_name ILIKE ${fuzzyQuery}
+                            OR qs_user.normalized_last_name ILIKE ${fuzzyQuery}
+                            OR (qs_user.normalized_first_name || ' ' || qs_user.normalized_last_name) ILIKE ${fuzzyQuery}
+                            OR qs_user.email ILIKE ${fuzzyQuery}
+                            OR qs_user.phone_code ILIKE ${fuzzyQuery}
+                            OR qs_user.phone_number ILIKE ${fuzzyQuery}
+                            OR (qs_user.phone_code || qs_user.phone_number) ILIKE ${fuzzyQuery})
                         `);
                     }
 
                     if (before) {
-                        whereClauses.push(sql`user.date_joined > ${before}`);
+                        whereClauses.push(
+                            sql`qs_user.date_joined > ${new Date(before).toISOString()}`,
+                        );
                     }
 
                     if (after) {
-                        whereClauses.push(sql`user.date_joined < ${after}`);
+                        whereClauses.push(
+                            sql`qs_user.date_joined < ${new Date(after).toISOString()}`,
+                        );
                     }
 
                     // Combine all parts into the final
@@ -169,14 +170,14 @@ schemaBuilder.queryFields((t) => ({
 
                     // Append ordering and limit as necessary
                     statement = statement.append(
-                        sql` ORDER BY user.date_joined ${inverted ? sql`ASC` : sql`DESC`}`,
+                        sql` ORDER BY qs_user.date_joined ${inverted ? sql`ASC` : sql`DESC`}`,
                     );
 
                     statement = statement.append(sql` LIMIT ${limit}`);
 
-                    const result = await DB.run(statement);
+                    const result = await DB.execute(statement);
 
-                    return result.rows.map((row) => {
+                    return result.map((row) => {
                         return selectUsersSchema.parse({
                             id: row.id,
                             sub: row.sub,
@@ -224,7 +225,7 @@ schemaBuilder.queryFields((t) => ({
             return resolveCursorConnection(
                 {
                     args,
-                    toCursor: (user) => Math.floor(user.dateJoined.getTime()).toString(),
+                    toCursor: (user) => user.dateJoined.toString(),
                 },
                 async ({
                     before,
@@ -238,23 +239,25 @@ schemaBuilder.queryFields((t) => ({
                     const joins = [];
 
                     // Base query
-                    let statement = sql`SELECT user.* FROM ${userTable} AS user`;
+                    let statement = sql`SELECT 
+                    qs_user.*
+                    FROM ${userTable} AS qs_user`;
 
                     joins.push(
-                        sql`INNER JOIN ${studentProfileTable} AS student ON user.id = student.user_id`,
+                        sql`INNER JOIN ${studentProfileTable} AS student ON qs_user.id = student.user_id`,
                     );
 
                     // Dynamic joins and conditions
                     if (query) {
                         const fuzzyQuery = `%${normalize(query)}%`;
                         whereClauses.push(sql`
-                            (user.normalized_first_name LIKE ${fuzzyQuery}
-                            OR user.normalized_last_name LIKE ${fuzzyQuery}
-                            OR (user.normalized_first_name || ' ' || user.normalized_last_name) LIKE ${fuzzyQuery}
-                            OR user.email LIKE ${fuzzyQuery}
-                            OR user.phone_code LIKE ${fuzzyQuery}
-                            OR user.phone_number LIKE ${fuzzyQuery}
-                            OR (user.phone_code || user.phone_number) LIKE ${fuzzyQuery})
+                            (qs_user.normalized_first_name ILIKE ${fuzzyQuery}
+                            OR qs_user.normalized_last_name ILIKE ${fuzzyQuery}
+                            OR (qs_user.normalized_first_name || ' ' || qs_user.normalized_last_name) ILIKE ${fuzzyQuery}
+                            OR qs_user.email ILIKE ${fuzzyQuery}
+                            OR qs_user.phone_code ILIKE ${fuzzyQuery}
+                            OR qs_user.phone_number ILIKE ${fuzzyQuery}
+                            OR (qs_user.phone_code || qs_user.phone_number) ILIKE ${fuzzyQuery})
                         `);
                     }
 
@@ -277,11 +280,15 @@ schemaBuilder.queryFields((t) => ({
                     }
 
                     if (before) {
-                        whereClauses.push(sql`user.date_joined > ${before}`);
+                        whereClauses.push(
+                            sql`qs_user.date_joined > ${new Date(before).toISOString()}`,
+                        );
                     }
 
                     if (after) {
-                        whereClauses.push(sql`user.date_joined < ${after}`);
+                        whereClauses.push(
+                            sql`qs_user.date_joined < ${new Date(after).toISOString()}`,
+                        );
                     }
 
                     // Combine all parts into the final statement
@@ -294,13 +301,13 @@ schemaBuilder.queryFields((t) => ({
 
                     // Append ordering and limit as necessary
                     statement = statement.append(
-                        sql` ORDER BY user.date_joined ${inverted ? sql`ASC` : sql`DESC`}`,
+                        sql` ORDER BY qs_user.date_joined ${inverted ? sql`ASC` : sql`DESC`}`,
                     );
 
                     statement = statement.append(sql` LIMIT ${limit}`);
 
-                    const result = await DB.run(statement);
-                    return result.rows.map((row) => {
+                    const result = await DB.execute(statement);
+                    return result.map((row) => {
                         return selectUsersSchema.parse({
                             id: row.id,
                             sub: row.sub,
@@ -336,23 +343,23 @@ schemaBuilder.queryFields((t) => ({
     myStudents: t.connection({
         type: UserRef,
         authz: {
-            rules: ['IsAuthenticated', 'IsTeacher'],
+            rules: ['IsAuthenticated', 'IsTeacher', 'IsVerifiedTeacher'],
         },
         resolve: (_, args, { DB, USER }) => {
             return resolveCursorConnection(
                 {
                     args,
-                    toCursor: (user) => Math.floor(user.dateJoined.getTime()).toString(),
+                    toCursor: (user) => user.dateJoined.toString(),
                 },
                 async ({ limit, inverted }: ResolveCursorConnectionArgs) => {
                     const whereClauses = [];
                     const joins = [];
 
                     // Base query
-                    let statement = sql`SELECT user.* FROM ${userTable} AS user`;
+                    let statement = sql`SELECT user.* FROM ${userTable} AS qs_user`;
 
                     joins.push(
-                        sql`INNER JOIN ${studentProfileTable} AS student ON user.id = student.user_id`,
+                        sql`INNER JOIN ${studentProfileTable} AS student ON qs_user.id = student.user_id`,
                     );
 
                     // Dynamic joins and conditions
@@ -376,13 +383,13 @@ schemaBuilder.queryFields((t) => ({
 
                     // Append ordering and limit as necessary
                     statement = statement.append(
-                        sql` ORDER BY user.date_joined ${inverted ? sql`ASC` : sql`DESC`}`,
+                        sql` ORDER BY qs_user.date_joined ${inverted ? sql`ASC` : sql`DESC`}`,
                     );
 
                     statement = statement.append(sql` LIMIT ${limit}`);
 
-                    const result = await DB.run(statement);
-                    return result.rows.map((row) => {
+                    const result = await DB.execute(statement);
+                    return result.map((row) => {
                         return selectUsersSchema.parse({
                             id: row.id,
                             sub: row.sub,
@@ -429,7 +436,7 @@ schemaBuilder.queryFields((t) => ({
             return resolveCursorConnection(
                 {
                     args,
-                    toCursor: (user) => Math.floor(user.dateJoined.getTime()).toString(),
+                    toCursor: (user) => user.dateJoined.toString(),
                 },
                 async ({
                     before,
@@ -443,32 +450,36 @@ schemaBuilder.queryFields((t) => ({
                     const joins = [];
 
                     // Base query
-                    let statement = sql`SELECT user.* FROM ${userTable} AS user`;
+                    let statement = sql`SELECT qs_user.* FROM ${userTable} AS qs_user`;
 
                     joins.push(
-                        sql`INNER JOIN ${teacherProfileTable} AS teacher ON user.id = teacher.user_id`,
+                        sql`INNER JOIN ${teacherProfileTable} AS teacher ON qs_user.id = teacher.user_id`,
                     );
 
                     // Dynamic joins and conditions
                     if (query) {
                         const fuzzyQuery = `%${normalize(query)}%`;
                         whereClauses.push(sql`
-                            (user.normalized_first_name LIKE ${fuzzyQuery}
-                            OR user.normalized_last_name LIKE ${fuzzyQuery}
-                            OR (user.normalized_first_name || ' ' || user.normalized_last_name) LIKE ${fuzzyQuery}
-                            OR user.email LIKE ${fuzzyQuery}
-                            OR user.phone_code LIKE ${fuzzyQuery}
-                            OR user.phone_number LIKE ${fuzzyQuery}
-                            OR (user.phone_code || user.phone_number) LIKE ${fuzzyQuery})
+                            (qs_user.normalized_first_name ILIKE ${fuzzyQuery}
+                            OR qs_user.normalized_last_name ILIKE ${fuzzyQuery}
+                            OR (qs_user.normalized_first_name || ' ' || qs_user.normalized_last_name) ILIKE ${fuzzyQuery}
+                            OR qs_user.email ILIKE ${fuzzyQuery}
+                            OR qs_user.phone_code ILIKE ${fuzzyQuery}
+                            OR qs_user.phone_number ILIKE ${fuzzyQuery}
+                            OR (qs_user.phone_code || qs_user.phone_number) ILIKE ${fuzzyQuery})
                         `);
                     }
 
                     if (before) {
-                        whereClauses.push(sql`user.date_joined > ${before}`);
+                        whereClauses.push(
+                            sql`qs_user.date_joined > ${new Date(before).toISOString()}`,
+                        );
                     }
 
                     if (after) {
-                        whereClauses.push(sql`user.date_joined < ${after}`);
+                        whereClauses.push(
+                            sql`qs_user.date_joined < ${new Date(after).toISOString()}`,
+                        );
                     }
 
                     // Combine all parts into the final statement
@@ -481,13 +492,13 @@ schemaBuilder.queryFields((t) => ({
 
                     // Append ordering and limit as necessary
                     statement = statement.append(
-                        sql` ORDER BY user.date_joined ${inverted ? sql`ASC` : sql`DESC`}`,
+                        sql` ORDER BY qs_user.date_joined ${inverted ? sql`ASC` : sql`DESC`}`,
                     );
 
                     statement = statement.append(sql` LIMIT ${limit}`);
 
-                    const result = await DB.run(statement);
-                    return result.rows.map((row) => {
+                    const result = await DB.execute(statement);
+                    return result.map((row) => {
                         return selectUsersSchema.parse({
                             id: row.id,
                             sub: row.sub,

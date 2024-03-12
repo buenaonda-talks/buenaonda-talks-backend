@@ -48,8 +48,7 @@ schemaBuilder.queryFields((t) => ({
             return resolveCursorConnection(
                 {
                     args,
-                    toCursor: (application) =>
-                        Math.floor(application.createdOn.getTime()).toString(),
+                    toCursor: (application) => application.createdOn.toString(),
                 },
                 async ({
                     before,
@@ -132,11 +131,15 @@ schemaBuilder.queryFields((t) => ({
                     }
 
                     if (before) {
-                        whereClauses.push(sql`application.created_on > ${before}`);
+                        whereClauses.push(
+                            sql`application.created_on > ${new Date(before).toISOString()}`,
+                        );
                     }
 
                     if (after) {
-                        whereClauses.push(sql`application.created_on < ${after}`);
+                        whereClauses.push(
+                            sql`application.created_on < ${new Date(after).toISOString()}`,
+                        );
                     }
 
                     // Combine all parts into the final statement
@@ -154,8 +157,8 @@ schemaBuilder.queryFields((t) => ({
 
                     statement = statement.append(sql` LIMIT ${limit}`);
 
-                    const result = await DB.run(statement);
-                    return result.rows.map((row) => {
+                    const result = await DB.execute(statement);
+                    return result.map((row) => {
                         return selectApplicationSchema.parse({
                             id: row.id,
                             acceptedTerms:

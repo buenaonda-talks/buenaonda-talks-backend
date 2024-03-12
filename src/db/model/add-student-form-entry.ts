@@ -1,30 +1,38 @@
-import { sqliteTable, int, text, index } from 'drizzle-orm/sqlite-core';
+import { pgTable, integer, text, index, serial } from 'drizzle-orm/pg-core';
 import { userTable } from './user';
 import { collegeTable } from './college';
 import { studentProfileTable } from './user';
 import { TIMESTAMP_FIELDS } from '@/db/shared';
 
-export const addStudentFormEntryTable = sqliteTable(
+export const addStudentFormEntryTable = pgTable(
     'forms_addstudentformentrymodel',
     {
-        id: int('id').primaryKey({ autoIncrement: true }).notNull(),
+        id: serial('id').primaryKey(),
         firstName: text('first_name').notNull(),
         lastName: text('last_name').notNull(),
         phoneCode: text('phone_code').notNull(),
-        adderId: int('adder_id')
+        adderId: integer('adder_id')
             .notNull()
-            .references(() => userTable.id),
-        collegeId: int('college_id')
+            .references(() => userTable.id, {
+                onDelete: 'cascade',
+            }),
+        collegeId: integer('college_id')
             .notNull()
-            .references(() => collegeTable.id),
-        userId: int('user_id')
+            .references(() => collegeTable.id, {
+                onDelete: 'cascade',
+            }),
+        userId: integer('user_id')
             .notNull()
-            .references(() => userTable.id),
-        studentId: int('student_id')
+            .references(() => userTable.id, {
+                onDelete: 'cascade',
+            }),
+        studentId: integer('student_id')
             .notNull()
-            .references(() => studentProfileTable.id),
+            .references(() => studentProfileTable.id, {
+                onDelete: 'cascade',
+            }),
         gradeCustom: text('grade_custom'),
-        grade: int('grade'),
+        grade: integer('grade'),
         email: text('email').notNull(),
         phoneNumber: text('phone_number').notNull(),
         ...TIMESTAMP_FIELDS,

@@ -4,6 +4,15 @@ import { StudentRepository } from '@/db/repository/student';
 import { CollegeInputRef } from '../college';
 import { CollegeRepository } from '@/db/repository/college';
 import { TeacherRepository } from '@/db/repository/teacher';
+import {
+    collegeAndTeacherRelationTable,
+    studentProfileTable,
+    teacherProfileTable,
+    userTable,
+    applicationFieldAnswerTable,
+    addStudentFormEntryTable,
+} from '@/db/drizzle-schema';
+import { eq } from 'drizzle-orm';
 
 export const UpdateTeacherCollegesInputRef = schemaBuilder.inputType(
     'UpdateTeacherCollegesInput',
@@ -356,6 +365,83 @@ schemaBuilder.mutationFields((t) => ({
             }
 
             return updatedTeacher;
+        },
+    }),
+    deleteUser: t.field({
+        type: 'Boolean',
+        authz: {
+            rules: ['IsAuthenticated', 'IsAdmin'],
+        },
+        args: {
+            userId: t.arg.int({
+                required: true,
+            }),
+        },
+        resolve: async (parent, args, { DB }) => {
+            const user = await DB.query.userTable.findFirst({
+                where: (field, { eq }) => {
+                    return eq(field.id, args.userId);
+                },
+            });
+            if (!user) {
+                throw new Error('User not found');
+            }
+
+            const teacherId = await DB.query.teacherProfileTable
+                .findFirst({
+                    where: (field, { eq }) => {
+                        return eq(field.userId, args.userId);
+                    },
+                    columns: {
+                        id: true,
+                    },
+                })
+                .then((teacher) => {
+                    return teacher?.id;
+                });
+            if (teacherId) {
+                await DB.delete(collegeAndTeacherRelationTable).where(
+                    eq(collegeAndTeacherRelationTable.teacherId, teacherId),
+                );
+
+                await DB.delete(teacherProfileTable).where(
+                    eq(teacherProfileTable.userId, args.userId),
+                );
+            }
+
+            await DB.delete(addStudentFormEntryTable).where(
+                eq(addStudentFormEntryTable.userId, args.userId),
+            );
+
+            await DB.delete(applicationFieldAnswerTable).where(
+                eq(applicationFieldAnswerTable.submissionId, args.userId),
+            );
+
+            const studentId = await DB.query.studentProfileTable
+                .findFirst({
+                    where: (field, { eq }) => {
+                        return eq(field.userId, args.userId);
+                    },
+                    columns: {
+                        id: true,
+                    },
+                })
+                .then((student) => {
+                    return student?.id;
+                });
+
+            if (studentId) {
+                await DB.delete(studentProfileTable).where(
+                    eq(studentProfileTable.userId, args.userId),
+                );
+                await DB.delete(studentProfileTable).where(
+                    eq(studentProfileTable.userId, args.userId),
+                );
+            }
+
+            await DB.delete(userTable).where(eq(userTable.id, args.userId));
+
+            return true;
         },
     }),
 }));

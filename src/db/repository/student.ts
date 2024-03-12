@@ -94,6 +94,6 @@ export const StudentRepository = {
         return await props.DB.insert(studentProfileTable)
             .values(values)
             .returning()
-            .get();
+            .then((res) => res[0]);
     },
 };

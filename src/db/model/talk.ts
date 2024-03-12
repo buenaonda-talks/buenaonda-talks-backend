@@ -1,4 +1,12 @@
-import { sqliteTable, int, index, text } from 'drizzle-orm/sqlite-core';
+import {
+    pgTable,
+    integer,
+    index,
+    text,
+    serial,
+    boolean,
+    timestamp,
+} from 'drizzle-orm/pg-core';
 import { userTable } from './user';
 import { convocatoryTable } from './convocatory';
 import { organizationTable } from './organization';
@@ -15,17 +23,13 @@ export enum TalkType {
     FIRST_DEVF_INTRODUCTION = 'FIRST_DEVF_INTRODUCTION',
 }
 
-export const talkTable = sqliteTable(
+export const talkTable = pgTable(
     'core_talkmodel',
     {
-        id: int('id').primaryKey({ autoIncrement: true }).notNull(),
+        id: serial('id').primaryKey(),
         uuid: text('uuid').notNull(),
-        startDateTime: int('start_date', {
-            mode: 'timestamp_ms',
-        }).notNull(),
-        endDateTime: int('end_date', {
-            mode: 'timestamp_ms',
-        }).notNull(),
+        startDateTime: timestamp('start_date').notNull(),
+        endDateTime: timestamp('end_date').notNull(),
         description: text('description'),
         type: text('type', {
             enum: [
@@ -42,15 +46,18 @@ export const talkTable = sqliteTable(
         zoomApiKey: text('zoom_api_key'),
         zoomApiSecret: text('zoom_api_secret'),
         zoomId: text('zoom_id'),
-        convocatoryId: int('convocatory_id')
+        convocatoryId: integer('convocatory_id')
             .notNull()
-            .references(() => convocatoryTable.id),
-        forOrganizationId: int('for_organization_id').references(
+            .references(() => convocatoryTable.id, {
+                onDelete: 'cascade',
+            }),
+        forOrganizationId: integer('for_organization_id').references(
             () => organizationTable.id,
+            {
+                onDelete: 'cascade',
+            },
         ),
-        isVisible: int('is_visible', {
-            mode: 'boolean',
-        }).notNull(),
+        isVisible: boolean('is_visible').notNull(),
         zoomRegisterUrl: text('zoom_register_url'),
         ...TIMESTAMP_FIELDS,
     },
@@ -71,24 +78,24 @@ export const talkTable = sqliteTable(
     },
 );
 
-export const talkInscriptionTable = sqliteTable(
+export const talkInscriptionTable = pgTable(
     'core_talkinscriptionmodel',
     {
-        id: int('id').primaryKey({ autoIncrement: true }).notNull(),
-        number: int('number').notNull(),
+        id: serial('id').primaryKey(),
+        number: integer('number').notNull(),
         joinUrl: text('join_url'),
-        assisted: int('assisted', {
-            mode: 'boolean',
-        }),
-        assistanceDatetime: int('assistance_datetime', {
-            mode: 'timestamp_ms',
-        }),
-        talkId: int('talk_id')
+        assisted: boolean('assisted'),
+        assistanceDatetime: timestamp('assistance_datetime'),
+        talkId: integer('talk_id')
             .notNull()
-            .references(() => talkTable.id),
-        userId: int('user_id')
+            .references(() => talkTable.id, {
+                onDelete: 'cascade',
+            }),
+        userId: integer('user_id')
             .notNull()
-            .references(() => userTable.id),
+            .references(() => userTable.id, {
+                onDelete: 'cascade',
+            }),
         ...TIMESTAMP_FIELDS,
     },
     (table) => {

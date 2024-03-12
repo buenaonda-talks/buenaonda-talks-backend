@@ -1,53 +1,66 @@
-import { sqliteTable, int, index, text, AnySQLiteColumn } from 'drizzle-orm/sqlite-core';
+import {
+    pgTable,
+    integer,
+    index,
+    text,
+    PgColumn,
+    serial,
+    boolean,
+    date,
+} from 'drizzle-orm/pg-core';
 import { convocatoryTable } from './convocatory';
 import { studentProfileTable, userTable } from './user';
 import { devfBatchGroupTable } from './devf';
 import { TIMESTAMP_FIELDS } from '@/db/shared';
 import { createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
+import { applicationTable } from './scholarship-application';
 
-export const scholarshipTable = sqliteTable(
+export const scholarshipTable = pgTable(
     'core_scholarshipmodel',
     {
-        id: int('id').primaryKey({ autoIncrement: true }).notNull(),
+        id: serial('id').primaryKey(),
         uuid: text('uuid').notNull(),
-        convocatoryId: int('convocatory_id')
+        convocatoryId: integer('convocatory_id')
             .notNull()
-            .references(() => convocatoryTable.id),
-        applicationId: int('postulation_id'),
-        // .references(() => applicationTable.id),
-        userId: int('user_id')
+            .references(() => convocatoryTable.id, {
+                onDelete: 'cascade',
+            }),
+        applicationId: integer('postulation_id').references(
+            (): PgColumn => applicationTable.id,
+            {
+                onDelete: 'cascade',
+            },
+        ),
+        userId: integer('user_id')
             .notNull()
-            .references(() => userTable.id),
-        studentId: int('student_id')
+            .references(() => userTable.id, {
+                onDelete: 'cascade',
+            }),
+        studentId: integer('student_id')
             .notNull()
-            .references(() => studentProfileTable.id),
-        resignDate: int('resign_date', {
-            mode: 'timestamp',
-        }),
+            .references(() => studentProfileTable.id, {
+                onDelete: 'cascade',
+            }),
+        resignDate: date('resign_date', { mode: 'date' }),
         resignInfluences: text('resign_influences'),
         resignReasons: text('resign_reasons'),
-        resigned: int('resigned', {
-            mode: 'boolean',
-        }).notNull(),
-        askedToRenew: int('asked_to_renew', {
-            mode: 'boolean',
-        }).notNull(),
-        askedToRenewDate: int('asked_to_renew_date', {
-            mode: 'timestamp',
-        }),
-        currentStatusId: int('current_status_id').references(
-            (): AnySQLiteColumn => scholarshipStatusHistoryTable.id,
+        resigned: boolean('resigned').notNull(),
+        askedToRenew: boolean('asked_to_renew').notNull(),
+        askedToRenewDate: date('asked_to_renew_date', { mode: 'date' }),
+        currentStatusId: integer('current_status_id').references(
+            (): PgColumn => scholarshipStatusHistoryTable.id,
+            {
+                onDelete: 'set null',
+            },
         ),
-        devfBatchGroupId: int('devf_batch_group_id').references(
+        devfBatchGroupId: integer('devf_batch_group_id').references(
             () => devfBatchGroupTable.id,
         ),
-        devfAddedArtificially: int('devf_added_artificially', {
-            mode: 'boolean',
-        }).notNull(),
-        platziCompletedMandatoryCourses: int('platzi_completed_mandatory_courses', {
-            mode: 'boolean',
-        }).notNull(),
+        devfAddedArtificially: boolean('devf_added_artificially').notNull(),
+        platziCompletedMandatoryCourses: boolean(
+            'platzi_completed_mandatory_courses',
+        ).notNull(),
         ...TIMESTAMP_FIELDS,
     },
     (table) => {
@@ -76,10 +89,10 @@ export enum ScholarshipStatus {
     INACTIVE = 'INACTIVE',
 }
 
-export const scholarshipStatusHistoryTable = sqliteTable(
+export const scholarshipStatusHistoryTable = pgTable(
     'core_scholarshipstatushistorymodel',
     {
-        id: int('id').primaryKey({ autoIncrement: true }).notNull(),
+        id: serial('id').primaryKey(),
         status: text('status', {
             enum: [
                 ScholarshipStatus.ACTIVE,
@@ -90,9 +103,11 @@ export const scholarshipStatusHistoryTable = sqliteTable(
             ],
         }).notNull(),
         observations: text('observations'),
-        scholarshipId: int('scholarship_id')
+        scholarshipId: integer('scholarship_id')
             .notNull()
-            .references((): AnySQLiteColumn => scholarshipTable.id),
+            .references((): PgColumn => scholarshipTable.id, {
+                onDelete: 'cascade',
+            }),
         ...TIMESTAMP_FIELDS,
     },
     (table) => {

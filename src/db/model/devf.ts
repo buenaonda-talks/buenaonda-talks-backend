@@ -1,18 +1,18 @@
-import { sqliteTable, int, text, index } from 'drizzle-orm/sqlite-core';
+import { pgTable, integer, text, index, serial } from 'drizzle-orm/pg-core';
 import { scholarshipTable } from './scholarship';
 import { TIMESTAMP_FIELDS } from '@/db/shared';
 
-export const devfBatchTable = sqliteTable('core_devfbatchmodel', {
-    id: int('id').primaryKey({ autoIncrement: true }).notNull(),
+export const devfBatchTable = pgTable('core_devfbatchmodel', {
+    id: serial('id').primaryKey(),
     createdOn: text('created_on').notNull(),
     modifiedOn: text('modified_on').notNull(),
-    number: int('number').notNull(),
+    number: integer('number').notNull(),
 });
 
-export const devfModuleTable = sqliteTable(
+export const devfModuleTable = pgTable(
     'core_devfmodulemodel',
     {
-        id: int('id').primaryKey({ autoIncrement: true }).notNull(),
+        id: serial('id').primaryKey(),
         module: text('module').notNull(),
         lesson1Date: text('lesson_1_date'),
         lesson2Date: text('lesson_2_date'),
@@ -22,10 +22,12 @@ export const devfModuleTable = sqliteTable(
         lesson6Date: text('lesson_6_date'),
         lesson7Date: text('lesson_7_date'),
         lesson8Date: text('lesson_8_date'),
-        numberOfLessons: int('number_of_lessons'),
-        batchId: int('batch_id')
+        numberOfLessons: integer('number_of_lessons'),
+        batchId: integer('batch_id')
             .notNull()
-            .references(() => devfBatchTable.id),
+            .references(() => devfBatchTable.id, {
+                onDelete: 'cascade',
+            }),
         ...TIMESTAMP_FIELDS,
     },
     (table) => {
@@ -37,14 +39,16 @@ export const devfModuleTable = sqliteTable(
     },
 );
 
-export const devfBatchGroupTable = sqliteTable(
+export const devfBatchGroupTable = pgTable(
     'core_devfbatchgroupmodel',
     {
-        id: int('id').primaryKey({ autoIncrement: true }).notNull(),
+        id: serial('id').primaryKey(),
         name: text('name').notNull(),
-        batchId: int('batch_id')
+        batchId: integer('batch_id')
             .notNull()
-            .references(() => devfBatchTable.id),
+            .references(() => devfBatchTable.id, {
+                onDelete: 'cascade',
+            }),
         ...TIMESTAMP_FIELDS,
     },
     (table) => {
@@ -56,10 +60,10 @@ export const devfBatchGroupTable = sqliteTable(
     },
 );
 
-export const scholarshipDevfModuleProgressTable = sqliteTable(
+export const scholarshipDevfModuleProgressTable = pgTable(
     'core_devfmoduleprogressmodel',
     {
-        id: int('id').primaryKey({ autoIncrement: true }).notNull(),
+        id: serial('id').primaryKey(),
         lesson1Assistance: text('lesson_1_assistance'),
         lesson2Assistance: text('lesson_2_assistance'),
         lesson3Assistance: text('lesson_3_assistance'),
@@ -68,13 +72,17 @@ export const scholarshipDevfModuleProgressTable = sqliteTable(
         lesson6Assistance: text('lesson_6_assistance'),
         lesson7Assistance: text('lesson_7_assistance'),
         lesson8Assistance: text('lesson_8_assistance'),
-        numberOfAssitances: int('number_of_assitances'),
-        moduleId: int('module_id')
+        numberOfAssitances: integer('number_of_assitances'),
+        moduleId: integer('module_id')
             .notNull()
-            .references(() => devfModuleTable.id),
-        scholarshipId: int('scholarship_id')
+            .references(() => devfModuleTable.id, {
+                onDelete: 'cascade',
+            }),
+        scholarshipId: integer('scholarship_id')
             .notNull()
-            .references(() => scholarshipTable.id),
+            .references(() => scholarshipTable.id, {
+                onDelete: 'cascade',
+            }),
         ...TIMESTAMP_FIELDS,
     },
     (table) => {

@@ -1,19 +1,12 @@
 {
     "version": "5",
-    "dialect": "sqlite",
+    "dialect": "pg",
     "entries": [
         {
             "idx": 0,
             "version": "5",
-            "when": 1707589849851,
-            "tag": "0000_thick_johnny_storm",
-            "breakpoints": true
-        },
-        {
-            "idx": 1,
-            "version": "5",
-            "when": 1710203067541,
-            "tag": "0001_known_talos",
+            "when": 1710214509837,
+            "tag": "0000_conscious_wrecker",
             "breakpoints": true
         }
     ]

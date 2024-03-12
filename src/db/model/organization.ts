@@ -1,10 +1,10 @@
-import { sqliteTable, int, text } from 'drizzle-orm/sqlite-core';
+import { pgTable, text, serial } from 'drizzle-orm/pg-core';
 import { TIMESTAMP_FIELDS } from '@/db/shared';
 import { createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
-export const organizationTable = sqliteTable('organizations_organizationmodel', {
-    id: int('id').primaryKey({ autoIncrement: true }).notNull(),
+export const organizationTable = pgTable('organizations_organizationmodel', {
+    id: serial('id').primaryKey(),
     name: text('name').notNull(),
     ...TIMESTAMP_FIELDS,
 });

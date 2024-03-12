@@ -27,7 +27,7 @@ class ApplicationStatusManager {
             .returning({
                 id: applicationHistoryTable.id,
             })
-            .get();
+            .then((res) => res[0]);
 
         return await this.db
             .update(applicationTable)

@@ -1,29 +1,33 @@
-import { sqliteTable, int, text, index } from 'drizzle-orm/sqlite-core';
+import { pgTable, integer, text, index, serial } from 'drizzle-orm/pg-core';
 import { scholarshipTable } from './scholarship';
 import { TIMESTAMP_FIELDS } from '@/db/shared';
 
-export const platziCourseTable = sqliteTable('core_platzicoursemodel', {
-    id: int('id').primaryKey({ autoIncrement: true }).notNull(),
+export const platziCourseTable = pgTable('core_platzicoursemodel', {
+    id: serial('id').primaryKey(),
     createdOn: text('created_on').notNull(),
     modifiedOn: text('modified_on').notNull(),
     title: text('title').notNull(),
     platziId: text('platzi_id').notNull(),
 });
 
-export const scholarshipPlatziCourseProgressTable = sqliteTable(
+export const scholarshipPlatziCourseProgressTable = pgTable(
     'core_platzicourseprogressmodel',
     {
-        id: int('id').primaryKey({ autoIncrement: true }).notNull(),
+        id: serial('id').primaryKey(),
         approvalDate: text('approval_date'),
         status: text('status').notNull(),
         progress: text('progress').notNull(),
         minutesOfStudy: text('minutes_of_study').notNull(),
-        courseId: int('course_id')
+        courseId: integer('course_id')
             .notNull()
-            .references(() => platziCourseTable.id),
-        scholarshipId: int('scholarship_id')
+            .references(() => platziCourseTable.id, {
+                onDelete: 'cascade',
+            }),
+        scholarshipId: integer('scholarship_id')
             .notNull()
-            .references(() => scholarshipTable.id),
+            .references(() => scholarshipTable.id, {
+                onDelete: 'cascade',
+            }),
         lastStudyDate: text('last_study_date'),
         ...TIMESTAMP_FIELDS,
     },

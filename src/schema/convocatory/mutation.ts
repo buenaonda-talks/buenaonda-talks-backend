@@ -73,7 +73,7 @@ schemaBuilder.mutationFields((t) => ({
             const convocatory = await DB.insert(convocatoryTable)
                 .values(values)
                 .returning()
-                .get();
+                .then((res) => res[0]);
 
             return convocatory;
         },
@@ -99,7 +99,7 @@ schemaBuilder.mutationFields((t) => ({
                 .set(values)
                 .where(eq(convocatoryTable.id, id))
                 .returning()
-                .get();
+                .then((res) => res[0]);
 
             return convocatory;
         },
@@ -119,7 +119,7 @@ schemaBuilder.mutationFields((t) => ({
             const result = await DB.delete(convocatoryTable)
                 .where(eq(convocatoryTable.id, id))
                 .returning()
-                .get();
+                .then((res) => res[0]);
 
             if (!result) {
                 throw new Error(`No se encontró la convocatoria con el id ${id}`);

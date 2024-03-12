@@ -29,7 +29,7 @@ export const FormRepository = {
                 ),
             )
             .limit(1)
-            .get();
+            .then((res) => res[0]);
 
         if (!result) {
             return null;

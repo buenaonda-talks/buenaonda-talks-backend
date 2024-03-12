@@ -1,7 +1,7 @@
-import { sqliteTable, int, text } from 'drizzle-orm/sqlite-core';
+import { pgTable, text, serial } from 'drizzle-orm/pg-core';
 
-export const serviceLogTable = sqliteTable('logger_servicerequest', {
-    id: int('id').primaryKey({ autoIncrement: true }).notNull(),
+export const serviceLogTable = pgTable('logger_servicerequest', {
+    id: serial('id').primaryKey(),
     createdAt: text('created_at').notNull(),
     startedAt: text('started_at'),
     finishedAt: text('finished_at'),

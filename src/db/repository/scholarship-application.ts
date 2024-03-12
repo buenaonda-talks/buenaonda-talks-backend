@@ -26,7 +26,7 @@ export const ScholarshipApplicationRepository = {
             )
             .orderBy(desc(applicationTable.createdOn))
             .limit(1)
-            .get();
+            .then((res) => res[0]);
 
         if (!result) {
             return null;

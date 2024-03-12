@@ -110,6 +110,7 @@ schemaBuilder.objectType(UserRef, {
 
         teacherProfile: t.field({
             type: TeacherRef,
+            nullable: true,
             resolve: async (parent, _args, { DB }) => {
                 const teacher = await DB.query.teacherProfileTable.findFirst({
                     where: (field, { eq }) => {
@@ -118,7 +119,7 @@ schemaBuilder.objectType(UserRef, {
                 });
 
                 if (!teacher) {
-                    throw new Error('Teacher not found');
+                    return null;
                 }
 
                 return selectTeacherSchema.parse(teacher);
@@ -216,6 +217,8 @@ schemaBuilder.objectType(TeacherRef, {
     description: 'Representation of a teacher',
     fields: (t) => ({
         id: t.exposeID('id', { nullable: false }),
+
+        isVerified: t.exposeBoolean('isVerified', { nullable: false }),
 
         user: t.field({
             type: UserRef,

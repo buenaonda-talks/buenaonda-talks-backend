@@ -75,9 +75,13 @@ export const TeacherRepository = {
     updateColleges: async (props: UpdateCollegesOptions) => {
         const { DB, teacherId, newColleges, collegeIDsToRemove } = props;
 
-        await DB.delete(collegeAndTeacherRelationTable)
-            .where(inArray(collegeAndTeacherRelationTable.collegeId, collegeIDsToRemove))
-            .get();
+        if (collegeIDsToRemove.length > 0) {
+            await DB.delete(collegeAndTeacherRelationTable)
+                .where(
+                    inArray(collegeAndTeacherRelationTable.collegeId, collegeIDsToRemove),
+                )
+                .then((res) => res[0]);
+        }
 
         for (const someCollege of newColleges) {
             const insertValues: InsertCollegeTeacherRelationSchema = {
@@ -86,7 +90,7 @@ export const TeacherRepository = {
                 commitsToParticipate: true,
                 rol: someCollege.rol,
             };
-            await DB.insert(collegeAndTeacherRelationTable).values(insertValues).get();
+            await DB.insert(collegeAndTeacherRelationTable).values(insertValues);
         }
 
         return true;
@@ -104,7 +108,7 @@ export const TeacherRepository = {
             })
             .where(inArray(teacherProfileTable.id, [teacherId]))
             .returning()
-            .get();
+            .then((res) => res[0]);
     },
     createTeacherProfile: async (props: CreateTeacherOptions) => {
         const valuesToParse: InsertTeacherSchema = {
@@ -118,6 +122,6 @@ export const TeacherRepository = {
         return await props.DB.insert(teacherProfileTable)
             .values(values)
             .returning()
-            .get();
+            .then((res) => res[0]);
     },
 };

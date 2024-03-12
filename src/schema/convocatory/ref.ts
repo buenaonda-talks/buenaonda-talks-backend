@@ -40,7 +40,7 @@ schemaBuilder.objectType(ConvocatoryRef, {
                     return null;
                 }
 
-                return countAddingsFromDate;
+                return new Date(countAddingsFromDate);
             },
         }),
         countAddingsTillDate: t.field({

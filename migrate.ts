@@ -1,7 +1,7 @@
 import { config } from 'dotenv';
-import { createClient } from '@libsql/client';
-import { drizzle } from 'drizzle-orm/libsql';
-import { migrate } from 'drizzle-orm/libsql/migrator';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import { migrate } from 'drizzle-orm/postgres-js/migrator';
+import postgres from 'postgres';
 
 const getClient = () => {
     config({ path: process.cwd() + '/.env', override: true });
@@ -14,12 +14,8 @@ const getClient = () => {
         throw new Error('TURSO_DB_AUTH_TOKEN is not defined');
     }
 
-    const client = createClient({
-        url: process.env.TURSO_DB_URL,
-        authToken: process.env.TURSO_DB_AUTH_TOKEN,
-    });
-
-    return client;
+    const migrationClient = postgres(process.env.NEON_DB_URL as string, { max: 1 });
+    return migrationClient;
 };
 
 const getMigrationFolder = () => {

@@ -15,7 +15,7 @@ import {
 import { YogaContext } from '@/types';
 import { eq, and, sql } from 'drizzle-orm';
 import { ApplicationStatus } from '@/db/shared';
-import { alias } from 'drizzle-orm/sqlite-core';
+import { alias } from 'drizzle-orm/pg-core';
 import dayjs from 'dayjs';
 
 export type AdminStatsItemScholarshipByConvocatory = {
@@ -309,27 +309,27 @@ class ConvocatoryStatItem {
         SELECT
             -- Postulation status counts
             SUM(CASE WHEN application_history.status = ${ApplicationStatus.ACCEPTED} THEN 1 ELSE 0 END) AS accepted,
-            SUM(CASE WHEN application_history.status = ${ApplicationStatus.ACCEPTED_TERMS} THEN 1 ELSE 0 END) AS acceptedTerms,
-            SUM(CASE WHEN application_history.status = ${ApplicationStatus.DECLINED_TERMS} THEN 1 ELSE 0 END) AS rejectedTerms,
-            SUM(CASE WHEN application_history.status = ${ApplicationStatus.PENDING} THEN 1 ELSE 0 END) AS pendingTerms,
-            SUM(CASE WHEN application_history.status = ${ApplicationStatus.TERMS_UNANSWERED} THEN 1 ELSE 0 END) AS unansweredTerms,
+            SUM(CASE WHEN application_history.status = ${ApplicationStatus.ACCEPTED_TERMS} THEN 1 ELSE 0 END) AS accepted_terms,
+            SUM(CASE WHEN application_history.status = ${ApplicationStatus.DECLINED_TERMS} THEN 1 ELSE 0 END) AS rejected_terms,
+            SUM(CASE WHEN application_history.status = ${ApplicationStatus.PENDING} THEN 1 ELSE 0 END) AS pending_terms,
+            SUM(CASE WHEN application_history.status = ${ApplicationStatus.TERMS_UNANSWERED} THEN 1 ELSE 0 END) AS unanswered_terms,
             SUM(CASE WHEN application_history.status = ${ApplicationStatus.SUBMITTED} THEN 1 ELSE 0 END) AS submitted,
             SUM(CASE WHEN application_history.status = ${ApplicationStatus.DECLINED} THEN 1 ELSE 0 END) AS declined,
 
         -- Talk statistics
         (SELECT COUNT(*) FROM ${talkInscriptionTable} AS talk_inscription1 JOIN ${talkTable} AS talk1 ON talk_inscription1.talk_id = talk1.id WHERE talk1.convocatory_id = ${this.convocatory.id}) AS inscriptions,
-        (SELECT COUNT(*) FROM ${talkInscriptionTable} AS talk_inscription2 JOIN ${talkTable} AS talk2 ON talk_inscription2.talk_id = talk2.id WHERE talk_inscription2.assisted = 1 AND talk2.convocatory_id = ${this.convocatory.id}) AS assistants,
+        (SELECT COUNT(*) FROM ${talkInscriptionTable} AS talk_inscription2 JOIN ${talkTable} AS talk2 ON talk_inscription2.talk_id = talk2.id WHERE talk_inscription2.assisted = TRUE AND talk2.convocatory_id = ${this.convocatory.id}) AS assistants,
 
         -- Scholarship statistics
         `;
 
         if (this.convocatory.kind === ScholarshipConvocatoryKind.DEVF) {
             statement.append(
-                sql`${this.convocatory.devfInformedGraduates || 0} AS scholarshipFinished,`,
+                sql`${this.convocatory.devfInformedGraduates || 0} AS scholarship_finished,`,
             );
         } else {
             statement.append(
-                sql`(SELECT COUNT(*) FROM ${scholarshipTable} AS scholarship3 WHERE scholarship3.convocatory_id = ${this.convocatory.id} AND scholarship3.platzi_completed_mandatory_courses = 1) AS scholarshipFinished,`,
+                sql`(SELECT COUNT(*) FROM ${scholarshipTable} AS scholarship3 WHERE scholarship3.convocatory_id = ${this.convocatory.id} AND scholarship3.platzi_completed_mandatory_courses = TRUE) AS scholarship_finished,`,
             );
         }
 
@@ -338,11 +338,11 @@ class ConvocatoryStatItem {
             this.convocatory.devfInformedResigned
         ) {
             statement.append(
-                sql`${this.convocatory.devfInformedResigned} AS scholarshipsWithdrawn,`,
+                sql`${this.convocatory.devfInformedResigned} AS scholarships_withdrawn,`,
             );
         } else {
             statement.append(
-                sql`(SELECT COUNT(*) FROM ${scholarshipTable} AS scholarship4 WHERE scholarship4.convocatory_id = ${this.convocatory.id} AND scholarship4.resigned = 1) AS scholarshipsWithdrawn,`,
+                sql`(SELECT COUNT(*) FROM ${scholarshipTable} AS scholarship4 WHERE scholarship4.convocatory_id = ${this.convocatory.id} AND scholarship4.resigned = TRUE) AS scholarships_withdrawn,`,
             );
         }
 
@@ -354,10 +354,10 @@ class ConvocatoryStatItem {
                 this.convocatory.devfInformedNotAssisted,
             ].reduce((a, b) => (a || 0) + (b || 0), 0) || 0;
         if (devFScholarshipsCount > 0) {
-            statement.append(sql`${devFScholarshipsCount} AS scholarshipsCount,`);
+            statement.append(sql`${devFScholarshipsCount} AS scholarships_count,`);
         } else {
             statement.append(
-                sql`(SELECT COUNT(*) FROM ${scholarshipTable} AS scholarship5 WHERE scholarship5.convocatory_id = ${this.convocatory.id}) AS scholarshipsCount,`,
+                sql`(SELECT COUNT(*) FROM ${scholarshipTable} AS scholarship5 WHERE scholarship5.convocatory_id = ${this.convocatory.id}) AS scholarships_count,`,
             );
         }
 
@@ -367,13 +367,13 @@ class ConvocatoryStatItem {
             const min = minDate(countAddingsFromDate);
             const max = maxDate(countAddingsTillDate);
             statement.append(sql`
-                (SELECT COUNT(*) FROM ${studentProfileTable} student_profile JOIN ${userTable} u ON student_profile.user_id = u.id WHERE u.date_joined BETWEEN ${min} AND ${max}) AS addedStudents,
-                (SELECT COUNT(*) FROM ${studentProfileTable} student_profile WHERE student_profile.signup_datetime BETWEEN ${min} AND ${max}) AS signedUpStudents
+                (SELECT COUNT(*) FROM ${studentProfileTable} student_profile JOIN ${userTable} u ON student_profile.user_id = u.id WHERE u.date_joined BETWEEN ${min} AND ${max}) AS added_students,
+                (SELECT COUNT(*) FROM ${studentProfileTable} student_profile WHERE student_profile.signup_datetime BETWEEN ${min} AND ${max}) AS signed_up_students
             `);
         } else {
             statement.append(sql`
-                0 AS addedStudents,
-                0 AS signedUpStudents
+                0 AS added_students,
+                0 AS signed_up_students
             `);
         }
 
@@ -384,47 +384,45 @@ class ConvocatoryStatItem {
             WHERE form.convocatory_id = ${this.convocatory.id}
         `);
 
-        const result = (await this.DB.run(statement).then(
-            (result) => result.rows[0],
-        )) as {
+        const result = (await this.DB.execute(statement).then((result) => result[0])) as {
             accepted: number;
-            acceptedTerms: number;
-            rejectedTerms: number;
-            pendingTerms: number;
-            unansweredTerms: number;
+            accepted_terms: number;
+            rejected_terms: number;
+            pending_terms: number;
+            unanswered_terms: number;
             submitted: number;
             declined: number;
             inscriptions: number;
             assistants: number;
-            addedStudents: number;
-            signedUpStudents: number;
-            scholarshipsCount: number;
-            scholarshipFinished: number;
-            scholarshipsWithdrawn: number;
+            added_students: number;
+            signed_up_students: number;
+            scholarships_count: number;
+            scholarship_finished: number;
+            scholarships_withdrawn: number;
         };
 
         return {
             postulationStats: {
-                accepted: result.accepted,
-                acceptedTerms: result.acceptedTerms,
-                rejectedTerms: result.rejectedTerms,
-                pendingTerms: result.pendingTerms,
-                unansweredTerms: result.unansweredTerms,
-                submitted: result.submitted,
-                declined: result.declined,
+                accepted: parseInt(result.accepted.toString(), 10),
+                acceptedTerms: parseInt(result.accepted_terms.toString(), 10),
+                rejectedTerms: parseInt(result.rejected_terms.toString(), 10),
+                pendingTerms: parseInt(result.pending_terms.toString(), 10),
+                unansweredTerms: parseInt(result.unanswered_terms.toString(), 10),
+                submitted: parseInt(result.submitted.toString(), 10),
+                declined: parseInt(result.declined.toString(), 10),
             },
             talkStats: {
-                inscriptions: result.inscriptions,
-                assistants: result.assistants,
+                inscriptions: parseInt(result.inscriptions.toString(), 10),
+                assistants: parseInt(result.assistants.toString(), 10),
             },
             studentStats: {
-                addedStudents: result.addedStudents,
-                signedUpStudents: result.signedUpStudents,
+                addedStudents: parseInt(result.added_students.toString(), 10),
+                signedUpStudents: parseInt(result.signed_up_students.toString(), 10),
             },
             scholarships: {
-                count: result.scholarshipsCount,
-                finished: result.scholarshipFinished,
-                withdrawn: result.scholarshipsWithdrawn,
+                count: parseInt(result.scholarships_count.toString(), 10),
+                finished: parseInt(result.scholarship_finished.toString(), 10),
+                withdrawn: parseInt(result.scholarships_withdrawn.toString(), 10),
             },
         };
     }

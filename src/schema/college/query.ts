@@ -58,8 +58,7 @@ schemaBuilder.queryFields((t) => ({
             return resolveCursorConnection(
                 {
                     args,
-                    toCursor: (college) =>
-                        Math.floor(college.createdOn.getTime()).toString(),
+                    toCursor: (college) => college.createdOn.toString(),
                 },
                 async ({
                     before,
@@ -111,11 +110,15 @@ schemaBuilder.queryFields((t) => ({
                     }
 
                     if (before) {
-                        whereClauses.push(sql`college.created_on > ${before}`);
+                        whereClauses.push(
+                            sql`college.created_on > ${new Date(before).toISOString()}`,
+                        );
                     }
 
                     if (after) {
-                        whereClauses.push(sql`college.created_on < ${after}`);
+                        whereClauses.push(
+                            sql`college.created_on < ${new Date(after).toISOString()}`,
+                        );
                     }
 
                     // Combine all parts into the final statement
@@ -133,8 +136,8 @@ schemaBuilder.queryFields((t) => ({
 
                     statement = statement.append(sql` LIMIT ${limit}`);
 
-                    const result = await DB.run(statement);
-                    return result.rows.map((row) => {
+                    const result = await DB.execute(statement);
+                    return result.map((row) => {
                         const next: SelectCollegeSchema = {
                             id: row.id as number,
                             name: row.name as string,

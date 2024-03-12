@@ -69,7 +69,7 @@ export const getUserWithClerkAsync = async ({ request, DB }: Options) => {
         .from(studentProfileTable)
         .where(eq(studentProfileTable.userId, user.id))
         .limit(1)
-        .get()
+        .then((res) => res[0])
         .then((x) => !!x?.id);
 
     const isAdmin = await DB.select({
@@ -78,7 +78,7 @@ export const getUserWithClerkAsync = async ({ request, DB }: Options) => {
         .from(adminProfileTable)
         .where(eq(adminProfileTable.userId, user.id))
         .limit(1)
-        .get()
+        .then((res) => res[0])
         .then((x) => !!x?.id);
 
     const isSuperAdmin = user.isSuperAdmin;

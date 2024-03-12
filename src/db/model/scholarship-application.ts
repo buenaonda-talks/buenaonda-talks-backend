@@ -1,4 +1,13 @@
-import { sqliteTable, int, index, AnySQLiteColumn, text } from 'drizzle-orm/sqlite-core';
+import {
+    pgTable,
+    integer,
+    index,
+    text,
+    serial,
+    boolean,
+    date,
+    PgColumn,
+} from 'drizzle-orm/pg-core';
 import { formFieldTable, formTable } from './scholarship-form';
 import { studentProfileTable, userTable } from './user';
 import { ApplicationStatus, TIMESTAMP_FIELDS } from '@/db/shared';
@@ -11,28 +20,33 @@ export enum ApplicationEmailResultNotificationStatus {
     FAILED = 'failed',
 }
 
-export const applicationTable = sqliteTable(
+export const applicationTable = pgTable(
     'core_postulationsubmissionmodel',
     {
-        id: int('id').primaryKey({ autoIncrement: true }).notNull(),
-        acceptedTerms: int('accepted_terms', {
-            mode: 'boolean',
-        }),
-        termsAcceptanceDate: int('terms_acceptance_date', {
-            mode: 'timestamp',
-        }),
-        formId: int('form_id')
+        id: serial('id').primaryKey(),
+        acceptedTerms: boolean('accepted_terms'),
+        termsAcceptanceDate: date('terms_acceptance_date', { mode: 'date' }),
+        formId: integer('form_id')
             .notNull()
-            .references(() => formTable.id),
-        studentId: int('student_id')
+            .references(() => formTable.id, {
+                onDelete: 'cascade',
+            }),
+        studentId: integer('student_id')
             .notNull()
-            .references(() => studentProfileTable.id),
-        userId: int('user_id')
+            .references(() => studentProfileTable.id, {
+                onDelete: 'cascade',
+            }),
+        userId: integer('user_id')
             .notNull()
-            .references(() => userTable.id),
+            .references(() => userTable.id, {
+                onDelete: 'cascade',
+            }),
         uuid: text('uuid').notNull(),
-        currentStatusId: int('current_status_id').references(
+        currentStatusId: integer('current_status_id').references(
             () => applicationHistoryTable.id,
+            {
+                onDelete: 'cascade',
+            },
         ),
         resultNotificationViaEmailStatus: text('result_notification_via_email_status', {
             enum: [
@@ -63,17 +77,21 @@ export const applicationTable = sqliteTable(
     },
 );
 
-export const applicationFieldAnswerTable = sqliteTable(
+export const applicationFieldAnswerTable = pgTable(
     'core_postulationsubmissionfieldanswermodel',
     {
-        id: int('id').primaryKey({ autoIncrement: true }).notNull(),
+        id: serial('id').primaryKey(),
         value: text('value'),
-        fieldId: int('field_id')
+        fieldId: integer('field_id')
             .notNull()
-            .references(() => formFieldTable.id),
-        submissionId: int('submission_id')
+            .references(() => formFieldTable.id, {
+                onDelete: 'cascade',
+            }),
+        submissionId: integer('submission_id')
             .notNull()
-            .references(() => applicationTable.id),
+            .references(() => applicationTable.id, {
+                onDelete: 'cascade',
+            }),
         ...TIMESTAMP_FIELDS,
     },
     (table) => {
@@ -88,10 +106,10 @@ export const applicationFieldAnswerTable = sqliteTable(
     },
 );
 
-export const applicationHistoryTable = sqliteTable(
+export const applicationHistoryTable = pgTable(
     'core_postulationsubmissionhistorymodel',
     {
-        id: int('id').primaryKey({ autoIncrement: true }).notNull(),
+        id: serial('id').primaryKey(),
         status: text('status', {
             enum: [
                 ApplicationStatus.SUBMITTED,
@@ -104,9 +122,11 @@ export const applicationHistoryTable = sqliteTable(
             ],
         }).notNull(),
         observations: text('observations'),
-        submissionId: int('submission_id')
+        submissionId: integer('submission_id')
             .notNull()
-            .references((): AnySQLiteColumn => applicationTable.id),
+            .references((): PgColumn => applicationTable.id, {
+                onDelete: 'cascade',
+            }),
         ...TIMESTAMP_FIELDS,
     },
     (table) => {

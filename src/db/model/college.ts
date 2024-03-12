@@ -1,19 +1,19 @@
-import { index, int, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { index, integer, pgTable, text, serial, boolean } from 'drizzle-orm/pg-core';
 import { TIMESTAMP_FIELDS } from '@/db/shared';
 import { communeTable } from './commune';
 import { teacherProfileTable } from './user';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
-export const collegeTable = sqliteTable(
+export const collegeTable = pgTable(
     'colleges_collegemodel',
     {
-        id: int('id').primaryKey({ autoIncrement: true }).notNull(),
+        id: serial('id').primaryKey(),
         name: text('name').notNull(),
-        hideFromSelection: int('hide_from_selection', {
-            mode: 'boolean',
-        }).notNull(),
-        communeId: int('commune_id').references(() => communeTable.id),
+        hideFromSelection: boolean('hide_from_selection').notNull(),
+        communeId: integer('commune_id').references(() => communeTable.id, {
+            onDelete: 'cascade',
+        }),
         normalizedName: text('normalized_name').notNull(),
         ...TIMESTAMP_FIELDS,
     },
@@ -26,20 +26,22 @@ export const collegeTable = sqliteTable(
     },
 );
 
-export const collegeAndTeacherRelationTable = sqliteTable(
+export const collegeAndTeacherRelationTable = pgTable(
     'colleges_collegeteacherrelationmodel',
     {
-        id: int('id').primaryKey({ autoIncrement: true }).notNull(),
+        id: serial('id').primaryKey(),
         rol: text('rol').notNull(),
-        commitsToParticipate: int('commits_to_participate', {
-            mode: 'boolean',
-        }).notNull(),
-        collegeId: int('college_id')
+        commitsToParticipate: boolean('commits_to_participate').notNull(),
+        collegeId: integer('college_id')
             .notNull()
-            .references(() => collegeTable.id),
-        teacherId: int('teacher_id')
+            .references(() => collegeTable.id, {
+                onDelete: 'cascade',
+            }),
+        teacherId: integer('teacher_id')
             .notNull()
-            .references(() => teacherProfileTable.id),
+            .references(() => teacherProfileTable.id, {
+                onDelete: 'cascade',
+            }),
         ...TIMESTAMP_FIELDS,
     },
     (table) => {

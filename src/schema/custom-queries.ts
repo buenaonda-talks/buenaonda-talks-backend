@@ -12,7 +12,6 @@ import {
     SelectTalkSchema,
     applicationHistoryTable,
     applicationTable,
-    convocatoryTable,
 } from '@/db/drizzle-schema';
 import { YogaContext } from '@/types';
 import { isAfter } from 'date-fns';
@@ -157,14 +156,14 @@ const hasValidApplication = async ({
                     submissionId: application.id,
                 })
                 .returning()
-                .get();
+                .then((res) => res[0]);
 
             await DB.update(applicationTable)
                 .set({
                     currentStatusId: newHistory.id,
                 })
                 .where(eq(applicationTable.id, application.id))
-                .get();
+                .then((res) => res[0]);
         }
     } else {
         if (status === ApplicationStatus.TERMS_UNANSWERED) {
@@ -174,14 +173,14 @@ const hasValidApplication = async ({
                     submissionId: application.id,
                 })
                 .returning()
-                .get();
+                .then((res) => res[0]);
 
             await DB.update(applicationTable)
                 .set({
                     currentStatusId: newHistory.id,
                 })
                 .where(eq(applicationTable.id, application.id))
-                .get();
+                .then((res) => res[0]);
         }
     }
 
@@ -304,26 +303,6 @@ schemaBuilder.queryFields((t) => ({
             return createTrackerCurrentStep({
                 platziTalk: talkOpen || talkUpcoming,
             });
-        },
-    }),
-}));
-
-schemaBuilder.mutationFields((t) => ({
-    createTestConvocatory: t.field({
-        type: 'Boolean',
-        // authz: {
-        //     rules: ['IsAuthenticated', 'IsAdmin'],
-        // },
-        resolve: async (parent, args, { DB }) => {
-            await DB.insert(convocatoryTable).values({
-                kind: ScholarshipConvocatoryKind.DEVF,
-                privateLabel: 'Test Convocatory',
-                order: 1,
-                isWithdrawable: false,
-                countAddingsFromDate: new Date('2021-12-24'),
-            });
-
-            return true;
         },
     }),
 }));

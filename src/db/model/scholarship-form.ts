@@ -1,11 +1,13 @@
 import {
-    sqliteTable,
+    pgTable,
     index,
-    foreignKey,
     text,
-    int,
-    AnySQLiteColumn,
-} from 'drizzle-orm/sqlite-core';
+    integer,
+    boolean,
+    timestamp,
+    serial,
+    PgColumn,
+} from 'drizzle-orm/pg-core';
 import { studentProfileTable, userTable } from './user';
 import { convocatoryTable } from './convocatory';
 import { ApplicationStatus, TIMESTAMP_FIELDS } from '@/db/shared';
@@ -20,28 +22,20 @@ export enum FormResultsStatus {
     FINISHED = 'finished',
 }
 
-export const formTable = sqliteTable(
+export const formTable = pgTable(
     'core_formmodel',
     {
-        id: int('id').primaryKey({ autoIncrement: true }).notNull(),
+        id: serial('id').primaryKey(),
         title: text('title').notNull(),
-        openDate: int('open_date', {
-            mode: 'timestamp_ms',
+        openDate: timestamp('open_date'),
+        closeDate: timestamp('close_date'),
+        resultsPublicationDate: timestamp('results_publication_date'),
+        convocatoryId: integer('convocatory_id').references(() => convocatoryTable.id, {
+            onDelete: 'cascade',
         }),
-        closeDate: int('close_date', {
-            mode: 'timestamp_ms',
-        }),
-        resultsPublicationDate: int('results_publication_date', {
-            mode: 'timestamp_ms',
-        }),
-        convocatoryId: int('convocatory_id').references(() => convocatoryTable.id),
         uuid: text('uuid').notNull(),
-        termsAcceptanceCloseDate: int('terms_acceptance_close_date', {
-            mode: 'timestamp_ms',
-        }),
-        termsAcceptanceOpenDate: int('terms_acceptance_open_date', {
-            mode: 'timestamp_ms',
-        }),
+        termsAcceptanceCloseDate: timestamp('terms_acceptance_close_date'),
+        termsAcceptanceOpenDate: timestamp('terms_acceptance_open_date'),
         resultsStatus: text('results_status', {
             enum: [
                 FormResultsStatus.NOT_SCHEDULED,
@@ -52,7 +46,7 @@ export const formTable = sqliteTable(
         })
             .notNull()
             .default(FormResultsStatus.NOT_SCHEDULED),
-        version: int('version').notNull(),
+        version: integer('version').notNull(),
         ...TIMESTAMP_FIELDS,
     },
     (table) => {
@@ -87,10 +81,10 @@ export enum FormFieldType {
     COLLEGE = 'COLLEGE',
 }
 
-export const formFieldTable = sqliteTable(
+export const formFieldTable = pgTable(
     'core_formfieldmodel',
     {
-        id: int('id').primaryKey({ autoIncrement: true }).notNull(),
+        id: serial('id').primaryKey(),
         title: text('title').notNull(),
         description: text('description'),
         type: text('type', {
@@ -103,22 +97,23 @@ export const formFieldTable = sqliteTable(
                 FormFieldType.COLLEGE,
             ],
         }).notNull(),
-        isRequired: int('is_required', {
-            mode: 'boolean',
-        }).notNull(),
-        isImportant: int('is_important', {
-            mode: 'boolean',
-        }).notNull(),
-        minLength: int('min_length'),
-        maxLength: int('max_length'),
-        formId: int('form_id')
+        isRequired: boolean('is_required').notNull(),
+        isImportant: boolean('is_important').notNull(),
+        minLength: integer('min_length'),
+        maxLength: integer('max_length'),
+        formId: integer('form_id')
             .notNull()
-            .references(() => formTable.id),
-        dependsOnFieldOptionId: int('depends_on_field_option_id').references(
-            (): AnySQLiteColumn => formFieldOptionTable.id,
+            .references(() => formTable.id, {
+                onDelete: 'cascade',
+            }),
+        dependsOnFieldOptionId: integer('depends_on_field_option_id').references(
+            (): PgColumn => formFieldOptionTable.id,
+            {
+                onDelete: 'cascade',
+            },
         ),
-        order: int('order').notNull(),
-        dependsOnFieldId: int('depends_on_field_id'),
+        order: integer('order').notNull(),
+        dependsOnFieldId: integer('depends_on_field_id'),
         ...TIMESTAMP_FIELDS,
     },
     (table) => {
@@ -132,11 +127,6 @@ export const formFieldTable = sqliteTable(
             formId8C637F82: index('core_formfieldmodel_form_id_8c637f82').on(
                 table.formId,
             ),
-            coreFormfieldmodeldependsOnFieldIdCoreFormfieldmodelIdFk: foreignKey(() => ({
-                columns: [table.dependsOnFieldId],
-                foreignColumns: [table.id],
-                name: 'core_formfieldmodel_depends_on_field_id_core_formfieldmodel_id_fk',
-            })),
         };
     },
 );
@@ -159,14 +149,16 @@ export const formFieldRelations = relations(formFieldTable, ({ many, one }) => {
     };
 });
 
-export const formFieldOptionTable = sqliteTable(
+export const formFieldOptionTable = pgTable(
     'core_formfieldoptionmodel',
     {
-        id: int('id').primaryKey({ autoIncrement: true }).notNull(),
+        id: serial('id').primaryKey(),
         label: text('label').notNull(),
-        fieldId: int('field_id')
+        fieldId: integer('field_id')
             .notNull()
-            .references((): AnySQLiteColumn => formFieldTable.id),
+            .references((): PgColumn => formFieldTable.id, {
+                onDelete: 'cascade',
+            }),
         automaticResult: text('automatic_result', {
             enum: [
                 ApplicationStatus.ACCEPTED,
@@ -175,9 +167,7 @@ export const formFieldOptionTable = sqliteTable(
             ],
         }),
         automaticResultObservations: text('automatic_result_observations'),
-        order: int('order', {
-            mode: 'number',
-        }).notNull(),
+        order: integer('order').notNull(),
         ...TIMESTAMP_FIELDS,
     },
     (table) => {
@@ -198,15 +188,21 @@ export const formFieldOptionRelations = relations(formFieldOptionTable, ({ one }
     };
 });
 
-export const formVisitLogTable = sqliteTable(
+export const formVisitLogTable = pgTable(
     'core_formvisitmodel',
     {
-        id: int('id').primaryKey({ autoIncrement: true }).notNull(),
-        studentId: int('student_id').references(() => studentProfileTable.id),
-        userId: int('user_id').references(() => userTable.id),
-        formId: int('form_id')
+        id: serial('id').primaryKey(),
+        studentId: integer('student_id').references(() => studentProfileTable.id, {
+            onDelete: 'cascade',
+        }),
+        userId: integer('user_id').references(() => userTable.id, {
+            onDelete: 'cascade',
+        }),
+        formId: integer('form_id')
             .notNull()
-            .references(() => formTable.id),
+            .references(() => formTable.id, {
+                onDelete: 'cascade',
+            }),
         ...TIMESTAMP_FIELDS,
     },
     (table) => {

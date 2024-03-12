@@ -30,7 +30,11 @@ schemaBuilder.objectType(ApplicationRef, {
             type: 'Date',
             nullable: true,
             resolve: (parent) => {
-                return parent.termsAcceptanceDate;
+                if (!parent.termsAcceptanceDate) {
+                    return null;
+                }
+
+                return new Date(parent.termsAcceptanceDate);
             },
         }),
 

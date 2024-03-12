@@ -151,7 +151,10 @@ schemaBuilder.mutationFields((t) => ({
                 resultsStatus: FormResultsStatus.NOT_SCHEDULED,
             };
             const formParsed = insertFormSchema.parse(formToParse);
-            const form = await DB.insert(formTable).values(formParsed).returning().get();
+            const form = await DB.insert(formTable)
+                .values(formParsed)
+                .returning()
+                .then((res) => res[0]);
 
             if (!form) {
                 throw new Error('Ocurrió un error al crear el formulario');
@@ -183,7 +186,7 @@ schemaBuilder.mutationFields((t) => ({
                 const insertedField = await DB.insert(formFieldTable)
                     .values(fieldParsed)
                     .returning()
-                    .get();
+                    .then((res) => res[0]);
 
                 fieldsUUIDsToIds.set(field.uuid, insertedField.id);
 
@@ -206,7 +209,7 @@ schemaBuilder.mutationFields((t) => ({
                     const insertedOption = await DB.insert(formFieldOptionTable)
                         .values(optionParsed)
                         .returning()
-                        .get();
+                        .then((res) => res[0]);
 
                     optionsUUIDsToIds.set(option.uuid, insertedOption.id);
                 }
@@ -269,7 +272,7 @@ schemaBuilder.mutationFields((t) => ({
                 .set(formParsed)
                 .where(eq(formTable.id, args.id))
                 .returning()
-                .get();
+                .then((res) => res[0]);
 
             if (!updatedForm) {
                 throw new Error('Ocurrió un error al actualizar el formulario');
@@ -305,12 +308,12 @@ schemaBuilder.mutationFields((t) => ({
                         .set(fieldParsed)
                         .where(eq(formFieldTable.id, field.id))
                         .returning()
-                        .get();
+                        .then((res) => res[0]);
                 } else {
                     upsertedField = await DB.insert(formFieldTable)
                         .values(fieldParsed)
                         .returning()
-                        .get();
+                        .then((res) => res[0]);
                 }
 
                 if (!upsertedField) {
@@ -342,12 +345,12 @@ schemaBuilder.mutationFields((t) => ({
                             .set(optionParsed)
                             .where(eq(formFieldOptionTable.id, option.id))
                             .returning()
-                            .get();
+                            .then((res) => res[0]);
                     } else {
                         upsertedOption = await DB.insert(formFieldOptionTable)
                             .values(optionParsed)
                             .returning()
-                            .get();
+                            .then((res) => res[0]);
                     }
 
                     if (!upsertedOption) {

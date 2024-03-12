@@ -52,7 +52,10 @@ export const CollegeRepository = {
         };
         const values = insertCollegeSchema.parse(valuesToParse);
 
-        const newCollege = await DB.insert(collegeTable).values(values).returning().get();
+        const newCollege = await DB.insert(collegeTable)
+            .values(values)
+            .returning()
+            .then((res) => res[0]);
 
         return newCollege;
     },
@@ -71,6 +74,6 @@ export const CollegeRepository = {
 
         return await DB.delete(collegeTable)
             .where(eq(collegeTable.id, sourceCollegeId))
-            .get();
+            .then((res) => res[0]);
     },
 };

@@ -51,7 +51,7 @@ export const updateUserProfileInfoAsync = async (
                 dateJoined: new Date(),
             })
             .returning()
-            .get();
+            .then((res) => res[0]);
 
         return selectUsersSchema.parse(user);
     }
@@ -79,7 +79,7 @@ export const updateUserProfileInfoAsync = async (
             ),
         )
         .returning()
-        .get();
+        .then((res) => res[0]);
 
     return selectUsersSchema.parse(user);
 };

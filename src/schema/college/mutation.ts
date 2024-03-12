@@ -61,7 +61,7 @@ schemaBuilder.mutationFields((t) => ({
             const result = await DB.delete(collegeTable)
                 .where(eq(collegeTable.id, id))
                 .returning()
-                .get();
+                .then((res) => res[0]);
 
             if (!result) {
                 return new ApiError({
@@ -127,7 +127,7 @@ schemaBuilder.mutationFields((t) => ({
                 })
                 .where(eq(collegeTable.id, id))
                 .returning()
-                .get();
+                .then((res) => res[0]);
 
             return newCollege;
         },

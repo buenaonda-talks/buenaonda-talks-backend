@@ -1,4 +1,4 @@
-import { sqliteTable, int, text } from 'drizzle-orm/sqlite-core';
+import { pgTable, integer, text, serial, date, boolean } from 'drizzle-orm/pg-core';
 import { TIMESTAMP_FIELDS } from '@/db/shared';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
@@ -8,39 +8,31 @@ export enum ScholarshipConvocatoryKind {
     DEVF = 'Dev.F',
 }
 
-export const convocatoryTable = sqliteTable('core_scholarshipconvocatorymodel', {
-    id: int('id').primaryKey({ autoIncrement: true }).notNull(),
+export const convocatoryTable = pgTable('core_scholarshipconvocatorymodel', {
+    id: serial('id').primaryKey(),
     privateLabel: text('private_label').notNull(),
 
     kind: text('kind', {
         enum: [ScholarshipConvocatoryKind.DEVF, ScholarshipConvocatoryKind.PLATZI],
     }).notNull(),
 
-    order: int('order').notNull(),
+    order: integer('order').notNull(),
 
-    countAddingsFromDate: int('count_addings_from_date', {
-        mode: 'timestamp',
-    }),
-    countAddingsTillDate: int('count_addings_till_date', {
-        mode: 'timestamp',
-    }),
+    countAddingsFromDate: date('count_addings_from_date', { mode: 'date' }),
+    countAddingsTillDate: date('count_addings_till_date', { mode: 'date' }),
 
     lessonsStartDate: text('lessons_start_date'),
     lessonsEndDate: text('lessons_end_date'),
 
-    maximumWithdrawalDate: int('maximum_withdrawal_date', {
-        mode: 'timestamp',
-    }),
+    maximumWithdrawalDate: date('maximum_withdrawal_date', { mode: 'date' }),
 
-    isWithdrawable: int('is_withdrawable', {
-        mode: 'boolean',
-    }).notNull(),
+    isWithdrawable: boolean('is_withdrawable').notNull(),
 
-    devfInformedGraduates: int('devf_informed_graduates'),
-    devfInformedPaused: int('devf_informed_paused'),
-    devfInformedResigned: int('devf_informed_resigned'),
-    devfInformedStudying: int('devf_informed_studying'),
-    devfInformedNotAssisted: int('devf_informed_not_assisted'),
+    devfInformedGraduates: integer('devf_informed_graduates'),
+    devfInformedPaused: integer('devf_informed_paused'),
+    devfInformedResigned: integer('devf_informed_resigned'),
+    devfInformedStudying: integer('devf_informed_studying'),
+    devfInformedNotAssisted: integer('devf_informed_not_assisted'),
 
     ...TIMESTAMP_FIELDS,
 });

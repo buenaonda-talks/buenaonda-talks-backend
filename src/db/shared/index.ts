@@ -1,21 +1,8 @@
-import { sql } from 'drizzle-orm';
-import { integer, int } from 'drizzle-orm/sqlite-core';
-
-export const timestampField = (fieldName: string) => {
-    return integer(fieldName, { mode: 'timestamp_ms' });
-};
+import { timestamp } from 'drizzle-orm/pg-core';
 
 export const TIMESTAMP_FIELDS = {
-    createdOn: int('created_on', {
-        mode: 'timestamp_ms',
-    })
-        .default(sql`CURRENT_TIMESTAMP`)
-        .notNull(),
-    modifiedOn: int('modified_on', {
-        mode: 'timestamp_ms',
-    })
-        .default(sql`CURRENT_TIMESTAMP`)
-        .notNull(),
+    createdOn: timestamp('created_on').defaultNow().notNull(),
+    modifiedOn: timestamp('modified_on').defaultNow().notNull(),
 };
 
 export enum ApplicationStatus {

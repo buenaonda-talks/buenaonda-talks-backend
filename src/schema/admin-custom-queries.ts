@@ -8,7 +8,7 @@ import {
 import { schemaBuilder } from './schema-builder';
 import { ConvocatoryRef } from './convocatory';
 import { count, eq, and, gte, lte, or } from 'drizzle-orm';
-import { alias } from 'drizzle-orm/sqlite-core';
+import { alias } from 'drizzle-orm/pg-core';
 import ConvocatoryStatItem, {
     AdminStatsItem,
     AdminStatsItemPostulationStatusDataItem,
@@ -308,7 +308,7 @@ schemaBuilder.queryFields((t) => ({
                                         lte(userTable.dateJoined, countAddingsTillDate),
                                     ),
                                 )
-                                .get()
+                                .then((res) => res[0])
                         )?.value || 0;
                 }
 
@@ -328,7 +328,7 @@ schemaBuilder.queryFields((t) => ({
                                     eq(talkInscriptionTable.assisted, true),
                                 ),
                             )
-                            .get()
+                            .then((res) => res[0])
                     )?.value || 0;
 
                 const formId = await DB.query.formTable
@@ -344,7 +344,7 @@ schemaBuilder.queryFields((t) => ({
                       })
                           .from(applicationTable)
                           .where(eq(applicationTable.formId, formId))
-                          .get()
+                          .then((res) => res[0])
                           .then((result) => result?.value || 0)
                     : 0;
             } else {
@@ -352,7 +352,7 @@ schemaBuilder.queryFields((t) => ({
                     value: count(),
                 })
                     .from(studentProfileTable)
-                    .get()
+                    .then((res) => res[0])
                     .then((result) => result?.value || 0);
 
                 assistancesToTalks = await DB.select({
@@ -360,14 +360,14 @@ schemaBuilder.queryFields((t) => ({
                 })
                     .from(talkInscriptionTable)
                     .where(eq(talkInscriptionTable.assisted, true))
-                    .get()
+                    .then((res) => res[0])
                     .then((result) => result?.value || 0);
 
                 postulationSubmissionsCount = await DB.select({
                     value: count(),
                 })
                     .from(applicationTable)
-                    .get()
+                    .then((res) => res[0])
                     .then((result) => result?.value || 0);
             }
 

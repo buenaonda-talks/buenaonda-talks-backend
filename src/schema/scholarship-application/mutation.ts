@@ -107,7 +107,7 @@ schemaBuilder.mutationFields((t) => ({
                         eq(applicationTable.userId, USER.id),
                     ),
                 )
-                .get();
+                .then((res) => res[0]);
 
             if (alreadyApplied) {
                 return new ApiError({
@@ -192,7 +192,7 @@ schemaBuilder.mutationFields((t) => ({
             const newApplication = await DB.insert(applicationTable)
                 .values(newApplicationValuesParse)
                 .returning()
-                .get();
+                .then((res) => res[0]);
 
             for (const answer of answers) {
                 await DB.insert(applicationFieldAnswerTable).values({
@@ -212,7 +212,7 @@ schemaBuilder.mutationFields((t) => ({
             const newPendingHistory = await DB.insert(applicationHistoryTable)
                 .values(newPendingHistoryValuesParsed)
                 .returning()
-                .get();
+                .then((res) => res[0]);
 
             await DB.update(applicationTable)
                 .set({

@@ -1,15 +1,17 @@
-import { index, int, text, sqliteTable } from 'drizzle-orm/sqlite-core';
+import { index, integer, text, pgTable, serial } from 'drizzle-orm/pg-core';
 import { TIMESTAMP_FIELDS } from '@/db/shared';
 import { createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
-export const communeTable = sqliteTable(
+export const communeTable = pgTable(
     'core_communemodel',
     {
-        id: int('id').primaryKey({ autoIncrement: true }).notNull(),
+        id: serial('id').primaryKey(),
         name: text('name').notNull(),
-        regionId: int('region_id')
-            .references(() => regionTable.id)
+        regionId: integer('region_id')
+            .references(() => regionTable.id, {
+                onDelete: 'cascade',
+            })
             .notNull(),
         normalizedName: text('normalized_name').notNull(),
         ...TIMESTAMP_FIELDS,
@@ -26,10 +28,10 @@ export const communeTable = sqliteTable(
     },
 );
 
-export const regionTable = sqliteTable(
+export const regionTable = pgTable(
     'core_regionmodel',
     {
-        id: int('id').primaryKey({ autoIncrement: true }).notNull(),
+        id: serial('id').primaryKey(),
         name: text('name').notNull(),
         normalizedName: text('normalized_name').notNull(),
         ...TIMESTAMP_FIELDS,

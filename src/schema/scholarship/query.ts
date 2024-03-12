@@ -48,8 +48,7 @@ schemaBuilder.queryFields((t) => ({
             return resolveCursorConnection(
                 {
                     args,
-                    toCursor: (scholarship) =>
-                        Math.floor(scholarship.createdOn.getTime()).toString(),
+                    toCursor: (scholarship) => scholarship.createdOn.toString(),
                 },
                 async ({
                     before,
@@ -134,11 +133,15 @@ schemaBuilder.queryFields((t) => ({
                     }
 
                     if (before) {
-                        whereClauses.push(sql`scholarship.created_on > ${before}`);
+                        whereClauses.push(
+                            sql`scholarship.created_on > ${new Date(before).toISOString()}`,
+                        );
                     }
 
                     if (after) {
-                        whereClauses.push(sql`scholarship.created_on < ${after}`);
+                        whereClauses.push(
+                            sql`scholarship.created_on < ${new Date(after).toISOString()}`,
+                        );
                     }
 
                     // Combine all parts into the final statement
@@ -156,8 +159,8 @@ schemaBuilder.queryFields((t) => ({
 
                     statement = statement.append(sql` LIMIT ${limit}`);
 
-                    const result = await DB.run(statement);
-                    return result.rows.map((row) => {
+                    const result = await DB.execute(statement);
+                    return result.map((row) => {
                         const next: SelectScholarshipSchema = {
                             id: row.id as number,
                             uuid: row.uuid as string,
