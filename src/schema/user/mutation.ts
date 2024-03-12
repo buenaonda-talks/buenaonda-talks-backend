@@ -444,4 +444,32 @@ schemaBuilder.mutationFields((t) => ({
             return true;
         },
     }),
+    verifyTeacher: t.field({
+        type: 'Boolean',
+        authz: {
+            rules: ['IsAuthenticated', 'IsAdmin'],
+        },
+        args: {
+            teacherId: t.arg.int({
+                required: true,
+            }),
+        },
+        resolve: async (parent, args, { DB }) => {
+            const exists = await TeacherRepository.exists({
+                DB,
+                teacherId: args.teacherId,
+            });
+            if (!exists) {
+                throw new Error('Teacher not found');
+            }
+
+            await TeacherRepository.update({
+                DB,
+                teacherId: args.teacherId,
+                verified: true,
+            });
+
+            return true;
+        },
+    }),
 }));
