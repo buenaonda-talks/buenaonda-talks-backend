@@ -209,6 +209,12 @@ export const teacherProfileTable = sqliteTable('generations_teachermodel', {
     userId: int('user_id')
         .notNull()
         .references(() => userTable.id),
+    isVerified: int('is_verified', {
+        mode: 'boolean',
+    }).notNull(),
+    hasSignedUp: int('has_signed_up', {
+        mode: 'boolean',
+    }).notNull(),
     ...TIMESTAMP_FIELDS,
 });
 

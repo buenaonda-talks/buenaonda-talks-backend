@@ -8,6 +8,13 @@
             "when": 1707589849851,
             "tag": "0000_thick_johnny_storm",
             "breakpoints": true
+        },
+        {
+            "idx": 1,
+            "version": "5",
+            "when": 1710203067541,
+            "tag": "0001_known_talos",
+            "breakpoints": true
         }
     ]
 }
