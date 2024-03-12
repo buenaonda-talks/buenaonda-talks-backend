@@ -57,7 +57,7 @@
         "p-limit": "^3.1.0",
         "passport": "^0.7.0",
         "passport-local": "^1.0.0",
-        "pg": "^3.4.3",
+        "postgres": "^3.4.3",
         "postmark": "^4.0.2",
         "react-email": "2.0.0",
         "redis": "^4.6.13",
