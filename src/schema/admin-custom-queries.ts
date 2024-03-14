@@ -248,8 +248,7 @@ schemaBuilder.queryFields((t) => ({
     adminStats: t.field({
         type: AdminStatsRef,
         args: {
-            convocatory: t.arg({
-                type: 'Int',
+            convocatoriesIds: t.arg.intList({
                 required: false,
             }),
         },
@@ -258,11 +257,12 @@ schemaBuilder.queryFields((t) => ({
         },
         nullable: false,
         resolve: async (root, args, { DB }) => {
-            const convocatoryId = args.convocatory;
+            const { convocatoriesIds } = args;
+
             const convocatories = await DB.query.convocatoryTable.findMany({
                 where: (fields, operators) => {
-                    if (convocatoryId) {
-                        return operators.eq(fields.id, convocatoryId);
+                    if (convocatoriesIds && convocatoriesIds.length > 0) {
+                        return operators.inArray(fields.id, convocatoriesIds);
                     }
 
                     return undefined;
@@ -282,71 +282,85 @@ schemaBuilder.queryFields((t) => ({
             let assistancesToTalks = 0;
             let postulationSubmissionsCount = 0;
 
-            if (convocatoryId) {
-                const convocatory = convocatories.length > 0 ? convocatories[0] : null;
-                const countAddingsFromDate = convocatory?.countAddingsFromDate
-                    ? new Date(convocatory.countAddingsFromDate)
-                    : null;
-                const countAddingsTillDate = convocatory?.countAddingsTillDate
-                    ? new Date(convocatory.countAddingsTillDate)
-                    : null;
+            if (convocatoriesIds && convocatoriesIds.length > 0) {
+                for (const convocatoryId of convocatoriesIds) {
+                    const convocatory = convocatories.find(
+                        (convocatory) => convocatory.id === convocatoryId,
+                    );
+                    const countAddingsFromDate = convocatory?.countAddingsFromDate
+                        ? new Date(convocatory.countAddingsFromDate)
+                        : null;
+                    const countAddingsTillDate = convocatory?.countAddingsTillDate
+                        ? new Date(convocatory.countAddingsTillDate)
+                        : null;
 
-                if (countAddingsFromDate && countAddingsTillDate) {
-                    studentsCount =
-                        (
+                    if (countAddingsFromDate && countAddingsTillDate) {
+                        studentsCount =
+                            studentsCount +
+                            ((
+                                await DB.select({
+                                    value: count(),
+                                })
+                                    .from(studentProfileTable)
+                                    .innerJoin(
+                                        userTable,
+                                        eq(userTable.id, studentProfileTable.userId),
+                                    )
+                                    .where(
+                                        and(
+                                            gte(
+                                                userTable.dateJoined,
+                                                countAddingsFromDate,
+                                            ),
+                                            lte(
+                                                userTable.dateJoined,
+                                                countAddingsTillDate,
+                                            ),
+                                        ),
+                                    )
+                                    .then((res) => res[0])
+                            )?.value || 0);
+                    }
+
+                    assistancesToTalks =
+                        assistancesToTalks +
+                        ((
                             await DB.select({
                                 value: count(),
                             })
-                                .from(studentProfileTable)
+                                .from(talkInscriptionTable)
                                 .innerJoin(
-                                    userTable,
-                                    eq(userTable.id, studentProfileTable.userId),
+                                    talkTable,
+                                    eq(talkTable.id, talkInscriptionTable.talkId),
                                 )
                                 .where(
                                     and(
-                                        gte(userTable.dateJoined, countAddingsFromDate),
-                                        lte(userTable.dateJoined, countAddingsTillDate),
+                                        eq(talkTable.convocatoryId, convocatoryId),
+                                        eq(talkInscriptionTable.assisted, true),
                                     ),
                                 )
                                 .then((res) => res[0])
-                        )?.value || 0;
-                }
+                        )?.value || 0);
 
-                assistancesToTalks =
-                    (
-                        await DB.select({
-                            value: count(),
+                    const formId = await DB.query.formTable
+                        .findFirst({
+                            where: (fields, operators) =>
+                                operators.eq(fields.convocatoryId, convocatoryId),
                         })
-                            .from(talkInscriptionTable)
-                            .innerJoin(
-                                talkTable,
-                                eq(talkTable.id, talkInscriptionTable.talkId),
-                            )
-                            .where(
-                                and(
-                                    eq(talkTable.convocatoryId, convocatoryId),
-                                    eq(talkInscriptionTable.assisted, true),
-                                ),
-                            )
-                            .then((res) => res[0])
-                    )?.value || 0;
+                        .then((form) => form?.id);
 
-                const formId = await DB.query.formTable
-                    .findFirst({
-                        where: (fields, operators) =>
-                            operators.eq(fields.convocatoryId, convocatoryId),
-                    })
-                    .then((form) => form?.id);
-
-                postulationSubmissionsCount = formId
-                    ? await DB.select({
-                          value: count(),
-                      })
-                          .from(applicationTable)
-                          .where(eq(applicationTable.formId, formId))
-                          .then((res) => res[0])
-                          .then((result) => result?.value || 0)
-                    : 0;
+                    postulationSubmissionsCount =
+                        postulationSubmissionsCount +
+                        (formId
+                            ? await DB.select({
+                                  value: count(),
+                              })
+                                  .from(applicationTable)
+                                  .where(eq(applicationTable.formId, formId))
+                                  .then((res) => res[0])
+                                  .then((result) => result?.value || 0)
+                            : 0);
+                }
             } else {
                 studentsCount = await DB.select({
                     value: count(),
