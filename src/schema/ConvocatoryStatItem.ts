@@ -17,6 +17,7 @@ import { eq, and, sql } from 'drizzle-orm';
 import { ApplicationStatus } from '@/db/shared';
 import { alias } from 'drizzle-orm/pg-core';
 import dayjs from 'dayjs';
+import { getRedisClient } from '@/redis-client';
 
 export type AdminStatsItemScholarshipByConvocatory = {
     convocatory: SelectConvocatorySchema;
@@ -80,6 +81,12 @@ class ConvocatoryStatItem {
     }
 
     public async getStats(): Promise<AdminStatsItem> {
+        const redis = await getRedisClient();
+        const cachedStats = await redis.get(`convocatory-stats:${this.convocatory.id}`);
+        if (cachedStats) {
+            return JSON.parse(cachedStats);
+        }
+
         const [
             comprehensiveStats,
             scholarshipsByConvocatorySource,
@@ -133,6 +140,11 @@ class ConvocatoryStatItem {
             scholarshipsStudying: this.countScholarshipsStudying(),
             scholarshipsWithdrawn: comprehensiveStats.scholarships.withdrawn,
         };
+
+        await redis.set(
+            `convocatory-stats:${this.convocatory.id}`,
+            JSON.stringify(result),
+        );
 
         return result;
     }

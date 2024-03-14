@@ -14,6 +14,7 @@ import ConvocatoryStatItem, {
     AdminStatsItemPostulationStatusDataItem,
     AdminStatsItemScholarshipByConvocatory,
 } from './ConvocatoryStatItem';
+import { getRedisClient } from '@/redis-client';
 
 type AdminStats = {
     stats: AdminStatsItem[];
@@ -282,6 +283,8 @@ schemaBuilder.queryFields((t) => ({
             let assistancesToTalks = 0;
             let postulationSubmissionsCount = 0;
 
+            const cacheClient = await getRedisClient();
+
             if (convocatoriesIds && convocatoriesIds.length > 0) {
                 for (const convocatoryId of convocatoriesIds) {
                     const convocatory = convocatories.find(
@@ -295,63 +298,81 @@ schemaBuilder.queryFields((t) => ({
                         : null;
 
                     if (countAddingsFromDate && countAddingsTillDate) {
-                        studentsCount =
-                            studentsCount +
-                            ((
+                        const cacheKey = `adminStats:studentsCount:${convocatoryId}`;
+                        const cachedStudentsCount = await cacheClient.get(cacheKey);
+                        if (cachedStudentsCount !== null) {
+                            studentsCount += parseInt(cachedStudentsCount);
+                        } else {
+                            studentsCount =
+                                studentsCount +
+                                ((
+                                    await DB.select({
+                                        value: count(),
+                                    })
+                                        .from(studentProfileTable)
+                                        .innerJoin(
+                                            userTable,
+                                            eq(userTable.id, studentProfileTable.userId),
+                                        )
+                                        .where(
+                                            and(
+                                                gte(
+                                                    userTable.dateJoined,
+                                                    countAddingsFromDate,
+                                                ),
+                                                lte(
+                                                    userTable.dateJoined,
+                                                    countAddingsTillDate,
+                                                ),
+                                            ),
+                                        )
+                                        .then((res) => res[0])
+                                )?.value || 0);
+                        }
+                    }
+
+                    const cacheKey = `adminStats:assistancesToTalks:${convocatoryId}`;
+                    const cachedAssistancesToTalks = await cacheClient.get(cacheKey);
+                    if (cachedAssistancesToTalks !== null) {
+                        assistancesToTalks += parseInt(cachedAssistancesToTalks);
+                    } else {
+                        const newCount =
+                            (
                                 await DB.select({
                                     value: count(),
                                 })
-                                    .from(studentProfileTable)
+                                    .from(talkInscriptionTable)
                                     .innerJoin(
-                                        userTable,
-                                        eq(userTable.id, studentProfileTable.userId),
+                                        talkTable,
+                                        eq(talkTable.id, talkInscriptionTable.talkId),
                                     )
                                     .where(
                                         and(
-                                            gte(
-                                                userTable.dateJoined,
-                                                countAddingsFromDate,
-                                            ),
-                                            lte(
-                                                userTable.dateJoined,
-                                                countAddingsTillDate,
-                                            ),
+                                            eq(talkTable.convocatoryId, convocatoryId),
+                                            eq(talkInscriptionTable.assisted, true),
                                         ),
                                     )
                                     .then((res) => res[0])
-                            )?.value || 0);
+                            )?.value || 0;
+                        assistancesToTalks = assistancesToTalks + newCount;
                     }
 
-                    assistancesToTalks =
-                        assistancesToTalks +
-                        ((
-                            await DB.select({
-                                value: count(),
+                    const cacheKey2 = `adminStats:postulationSubmissionsCount:${convocatoryId}`;
+                    const cachedPostulationSubmissionsCount =
+                        await cacheClient.get(cacheKey2);
+                    if (cachedPostulationSubmissionsCount !== null) {
+                        postulationSubmissionsCount += parseInt(
+                            cachedPostulationSubmissionsCount,
+                        );
+                    } else {
+                        const formId = await DB.query.formTable
+                            .findFirst({
+                                where: (fields, operators) =>
+                                    operators.eq(fields.convocatoryId, convocatoryId),
                             })
-                                .from(talkInscriptionTable)
-                                .innerJoin(
-                                    talkTable,
-                                    eq(talkTable.id, talkInscriptionTable.talkId),
-                                )
-                                .where(
-                                    and(
-                                        eq(talkTable.convocatoryId, convocatoryId),
-                                        eq(talkInscriptionTable.assisted, true),
-                                    ),
-                                )
-                                .then((res) => res[0])
-                        )?.value || 0);
+                            .then((form) => form?.id);
 
-                    const formId = await DB.query.formTable
-                        .findFirst({
-                            where: (fields, operators) =>
-                                operators.eq(fields.convocatoryId, convocatoryId),
-                        })
-                        .then((form) => form?.id);
-
-                    postulationSubmissionsCount =
-                        postulationSubmissionsCount +
-                        (formId
+                        const newCount = formId
                             ? await DB.select({
                                   value: count(),
                               })
@@ -359,7 +380,12 @@ schemaBuilder.queryFields((t) => ({
                                   .where(eq(applicationTable.formId, formId))
                                   .then((res) => res[0])
                                   .then((result) => result?.value || 0)
-                            : 0);
+                            : 0;
+                        postulationSubmissionsCount =
+                            postulationSubmissionsCount + newCount;
+
+                        cacheClient.set(cacheKey2, newCount);
+                    }
                 }
             } else {
                 studentsCount = await DB.select({
