@@ -6,12 +6,8 @@ import postgres from 'postgres';
 const getClient = () => {
     config({ path: process.cwd() + '/.env', override: true });
 
-    if (!process.env.TURSO_DB_URL) {
-        throw new Error('TURSO_DB_URL is not defined');
-    }
-
-    if (!process.env.TURSO_DB_AUTH_TOKEN) {
-        throw new Error('TURSO_DB_AUTH_TOKEN is not defined');
+    if (!process.env.NEON_DB_URL) {
+        throw new Error('NEON_DB_URL is not defined');
     }
 
     const migrationClient = postgres(process.env.NEON_DB_URL as string, { max: 1 });

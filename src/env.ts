@@ -17,9 +17,9 @@ export const validateEnv = () => {
         );
     }
 
-    if (!process.env.TURSO_DB_URL || !process.env.TURSO_DB_AUTH_TOKEN) {
+    if (!process.env.NEON_DB_URL) {
         throw new Error(
-            `TURSO_DB_URL and TURSO_DB_AUTH_TOKEN are required. You can get these values from https://turso.tech/app`,
+            `NEON_DB_URL is required. You can get this value from your database provider.`,
         );
     }
 
@@ -77,10 +77,6 @@ export const env = {
         PEM_PUBLIC_KEY: process.env.CLERK_PEM_PUBLIC_KEY!.replace(/\\n/g, '\n'),
         ISSUER_ID: process.env.CLERK_ISSUER_ID!,
         SECRET_KEY: process.env.CLERK_SECRET_KEY!,
-    },
-    TURSO: {
-        DB_URL: process.env.TURSO_DB_URL!,
-        DB_AUTH_TOKEN: process.env.TURSO_DB_AUTH_TOKEN!,
     },
     ZOOM: {
         ACCOUNT_ID: process.env.ZOOM_ACCOUNT_ID!,

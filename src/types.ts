@@ -14,8 +14,6 @@ export type YogaContext<Authenticated = true> = YogaInitialContext &
 
 export interface YogaEnv {
     GRAPHQL_BASE_ENDPOINT: '/';
-    TURSO_DB_URL: string | undefined;
-    TURSO_DB_AUTH_TOKEN: string | undefined;
     CLERK_PEM_PUBLIC_KEY: string | undefined;
     CLERK_ISSUER_ID: string | undefined;
     ENFORCED_JWT_TOKEN: string | undefined;
