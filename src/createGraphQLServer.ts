@@ -17,7 +17,7 @@ export const createGraphQLServer = () => {
         authZEnvelopPlugin({ rules: authzRules }),
     ];
 
-    if (!env.isProduction) {
+    if (env.isProduction) {
         plugins.push(
             useMaskedErrors({
                 errorMessage: 'Internal Server Error',
