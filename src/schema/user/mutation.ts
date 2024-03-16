@@ -13,6 +13,7 @@ import {
     addStudentFormEntryTable,
 } from '@/db/drizzle-schema';
 import { eq } from 'drizzle-orm';
+import { UserRepository } from '@/db/repository/user';
 
 export const UpdateTeacherCollegesInputRef = schemaBuilder.inputType(
     'UpdateTeacherCollegesInput',
@@ -27,6 +28,26 @@ export const UpdateTeacherCollegesInputRef = schemaBuilder.inputType(
         }),
     },
 );
+
+export const StudentInputRef = schemaBuilder.inputType('StudentInput', {
+    fields: (t) => ({
+        firstName: t.string({
+            required: true,
+        }),
+        lastName: t.string({
+            required: true,
+        }),
+        email: t.string({
+            required: true,
+        }),
+        phoneCode: t.int({
+            required: false,
+        }),
+        phoneNumber: t.int({
+            required: false,
+        }),
+    }),
+});
 
 schemaBuilder.mutationFields((t) => ({
     createMyStudentProfile: t.field({
@@ -468,6 +489,204 @@ schemaBuilder.mutationFields((t) => ({
                 teacherId: args.teacherId,
                 verified: true,
             });
+
+            return true;
+        },
+    }),
+    createStudent: t.field({
+        type: StudentRef,
+        authz: {
+            rules: ['IsAuthenticated', 'IsAdmin'],
+        },
+        args: {
+            studentDetails: t.arg({
+                type: StudentInputRef,
+                required: true,
+            }),
+            collegeId: t.arg.int({
+                required: false,
+            }),
+            newCollegeName: t.arg.string({
+                required: false,
+            }),
+            communeId: t.arg.int({
+                required: false,
+            }),
+        },
+        resolve: async (parent, args, { DB }) => {
+            const exists = await UserRepository.exists({
+                DB,
+                forEmail: args.studentDetails.email,
+            });
+
+            if (exists) {
+                throw new Error('User already exists');
+            }
+
+            const user = await UserRepository.create({
+                DB,
+                email: args.studentDetails.email,
+                firstName: args.studentDetails.firstName,
+                lastName: args.studentDetails.lastName,
+                phoneCode: args.studentDetails.phoneCode || null,
+                phoneNumber: args.studentDetails.phoneNumber || null,
+            });
+
+            const student = await StudentRepository.createStudentProfile({
+                DB,
+                userId: user.id,
+            });
+
+            if (args.collegeId) {
+                await StudentRepository.updateCollege({
+                    DB,
+                    collegeId: args.collegeId,
+                    studentId: student.id,
+                });
+            } else if (args.newCollegeName && args.communeId) {
+                const college = await CollegeRepository.create({
+                    DB,
+                    name: args.newCollegeName,
+                    communeId: args.communeId,
+                });
+
+                await StudentRepository.updateCollege({
+                    DB,
+                    collegeId: college.id,
+                    studentId: student.id,
+                });
+            }
+
+            return student;
+        },
+    }),
+    updateStudent: t.field({
+        type: StudentRef,
+        authz: {
+            rules: ['IsAuthenticated', 'IsAdmin'],
+        },
+        args: {
+            studentDetails: t.arg({
+                type: StudentInputRef,
+                required: true,
+            }),
+            userId: t.arg.int({
+                required: true,
+            }),
+            collegeId: t.arg.int({
+                required: false,
+            }),
+            newCollegeName: t.arg.string({
+                required: false,
+            }),
+            communeId: t.arg.int({
+                required: false,
+            }),
+        },
+        resolve: async (parent, args, { DB }) => {
+            const studentId = await DB.query.studentProfileTable
+                .findFirst({
+                    where: (field, { eq }) => {
+                        return eq(field.userId, args.userId);
+                    },
+                    columns: {
+                        id: true,
+                    },
+                })
+                .then((student) => {
+                    return student?.id;
+                });
+
+            if (!studentId) {
+                throw new Error('Student not found');
+            }
+
+            await UserRepository.update({
+                DB,
+                id: args.userId,
+                values: {
+                    firstName: args.studentDetails.firstName,
+                    lastName: args.studentDetails.lastName,
+                    phoneCode: args.studentDetails.phoneCode?.toString() || null,
+                    phoneNumber: args.studentDetails.phoneNumber?.toString() || null,
+                },
+            });
+
+            if (args.collegeId) {
+                await StudentRepository.updateCollege({
+                    DB,
+                    collegeId: args.collegeId,
+                    studentId: studentId,
+                });
+            } else if (args.newCollegeName && args.communeId) {
+                const college = await CollegeRepository.create({
+                    DB,
+                    name: args.newCollegeName,
+                    communeId: args.communeId,
+                });
+
+                await StudentRepository.updateCollege({
+                    DB,
+                    collegeId: college.id,
+                    studentId: studentId,
+                });
+            }
+
+            const student = await DB.query.studentProfileTable.findFirst({
+                where: (field, { eq }) => {
+                    return eq(field.userId, args.userId);
+                },
+            });
+
+            if (!student) {
+                throw new Error('Student not found');
+            }
+
+            return student;
+        },
+    }),
+    importStudents: t.field({
+        type: 'Boolean',
+        authz: {
+            rules: ['IsAuthenticated', 'IsAdmin'],
+        },
+        args: {
+            students: t.arg({
+                type: [StudentInputRef],
+                required: true,
+            }),
+            collegeId: t.arg.int({
+                required: true,
+            }),
+        },
+        resolve: async (parent, args, { DB }) => {
+            const students = await Promise.all(
+                args.students.map(async (student) => {
+                    return await UserRepository.create({
+                        DB,
+                        email: student.email,
+                        firstName: student.firstName,
+                        lastName: student.lastName,
+                        phoneCode: student.phoneCode || null,
+                        phoneNumber: student.phoneNumber || null,
+                    }).then((user) => {
+                        return StudentRepository.createStudentProfile({
+                            DB,
+                            userId: user.id,
+                        });
+                    });
+                }),
+            );
+
+            await Promise.all(
+                students.map((student) => {
+                    return StudentRepository.updateCollege({
+                        DB,
+                        collegeId: args.collegeId,
+                        studentId: student.id,
+                    });
+                }),
+            );
 
             return true;
         },

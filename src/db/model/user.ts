@@ -30,8 +30,6 @@ export enum WhatsappStatus {
     BLOCKED = 4,
 }
 
-export type SelectUserSchema = z.infer<typeof selectUsersSchema>;
-
 export const userTable = pgTable(
     'users_usermodel',
     {
@@ -85,9 +83,6 @@ export const userTable = pgTable(
         };
     },
 );
-
-export const selectUsersSchema = createSelectSchema(userTable);
-export const insertUsersSchema = createInsertSchema(userTable);
 
 export const boardMemberTable = pgTable('generations_boardmembermodel', {
     id: serial('id').primaryKey(),
@@ -175,6 +170,12 @@ export const studentProfileTable = pgTable(
         };
     },
 );
+
+export const selectUsersSchema = createSelectSchema(userTable);
+export type SelectUserSchema = z.infer<typeof selectUsersSchema>;
+
+export const insertUserSchema = createInsertSchema(userTable);
+export type InsertUserSchema = z.infer<typeof insertUserSchema>;
 
 export const selectStudentSchema = createSelectSchema(studentProfileTable);
 export type SelectStudentSchema = z.infer<typeof selectStudentSchema>;

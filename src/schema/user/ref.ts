@@ -209,6 +209,29 @@ schemaBuilder.objectType(StudentRef, {
                 return application;
             },
         }),
+
+        college: t.field({
+            type: CollegeRef,
+            nullable: true,
+            resolve: async (parent, _args, { DB }) => {
+                const { collegeId } = parent;
+                if (!collegeId) {
+                    return null;
+                }
+
+                const college = await DB.query.collegeTable.findFirst({
+                    where: (fields, ops) => {
+                        return ops.eq(fields.id, collegeId);
+                    },
+                });
+
+                if (!college) {
+                    return null;
+                }
+
+                return college;
+            },
+        }),
     }),
 });
 

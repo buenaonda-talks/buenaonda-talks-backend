@@ -2,10 +2,11 @@ import {
     InsertStudentSchema,
     insertStudentSchema,
     studentProfileTable,
+    userTable,
 } from '@/db/drizzle-schema';
 import { YogaContext } from '@/types';
 import { randomUUID } from 'crypto';
-import { eq } from 'drizzle-orm';
+import { eq, exists } from 'drizzle-orm';
 
 type ExistsOptions = {
     DB: YogaContext['DB'];
@@ -15,6 +16,9 @@ type ExistsOptions = {
       }
     | {
           studentId: number;
+      }
+    | {
+          forEmail: string;
       }
 );
 
@@ -50,15 +54,34 @@ export const StudentRepository = {
             return student;
         }
 
-        const student = await DB.query.studentProfileTable
-            .findFirst({
-                where: (field, { eq }) => {
-                    return eq(field.id, props.studentId);
-                },
-                columns: {
-                    id: true,
-                },
-            })
+        if ('studentId' in props) {
+            const student = await DB.query.studentProfileTable
+                .findFirst({
+                    where: (field, { eq }) => {
+                        return eq(field.id, props.studentId);
+                    },
+                    columns: {
+                        id: true,
+                    },
+                })
+                .then((student) => {
+                    return !!student;
+                });
+
+            return student;
+        }
+
+        const student = await DB.select({
+            id: studentProfileTable.id,
+        })
+            .from(studentProfileTable)
+            .where(
+                exists(
+                    DB.select()
+                        .from(userTable)
+                        .where(eq(userTable.email, props.forEmail)),
+                ),
+            )
             .then((student) => {
                 return !!student;
             });

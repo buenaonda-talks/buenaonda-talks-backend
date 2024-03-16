@@ -16,6 +16,7 @@ import {
 } from '@/db/drizzle-schema';
 import { normalize } from '@/utils';
 import { TeacherRepository } from '@/db/repository/teacher';
+import { StudentRepository } from '@/db/repository/student';
 
 const StudentsFilterRef = schemaBuilder.inputType('StudentsFilter', {
     fields: (t) => ({
@@ -340,6 +341,43 @@ schemaBuilder.queryFields((t) => ({
                     });
                 },
             );
+        },
+    }),
+    studentUserById: t.field({
+        type: UserRef,
+        args: {
+            userId: t.arg({
+                type: 'Int',
+                required: true,
+            }),
+        },
+        authz: {
+            rules: ['IsAuthenticated', 'IsAdmin'],
+        },
+        resolve: async (_, { userId }, { DB }) => {
+            const exists = await StudentRepository.exists({
+                DB,
+                forUserId: userId,
+            });
+            if (!exists) {
+                throw new Error('Student not found');
+            }
+
+            const user = await DB.query.userTable
+                .findFirst({
+                    where: (field, { eq }) => {
+                        return eq(field.id, userId);
+                    },
+                })
+                .then((user) => {
+                    return user;
+                });
+
+            if (!user) {
+                throw new Error('User not found');
+            }
+
+            return selectUsersSchema.parse(user);
         },
     }),
 
