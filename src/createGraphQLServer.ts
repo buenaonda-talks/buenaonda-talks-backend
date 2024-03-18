@@ -40,18 +40,20 @@ export const createGraphQLServer = () => {
         landingPage: !env.isProduction,
         graphqlEndpoint: '/graphql',
         logging: env.isProduction ? true : 'debug',
-        graphiql: () => {
-            return {
-                title: 'BuenaOnda Talks GraphiQL',
-                subscriptionsProtocol: 'SSE',
-                headers: env.isDevelopment
-                    ? `{
+        graphiql: env.isProduction
+            ? false
+            : () => {
+                  return {
+                      title: 'BuenaOnda Talks GraphiQL',
+                      subscriptionsProtocol: 'SSE',
+                      headers: env.isDevelopment
+                          ? `{
                         "Authorization": "Bearer ${env.ENFORCED_JWT_TOKEN ?? 'INSERT_TOKEN_HERE'}",
                         "x-graphql-csrf-token": "your-csrf-token-in-production"
                     }`
-                    : `{}`,
-            };
-        },
+                          : `{}`,
+                  };
+              },
         cors: () => {
             return {
                 origin: env.ALLOWED_ORIGIN,
