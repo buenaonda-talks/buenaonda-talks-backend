@@ -8,6 +8,13 @@
             "when": 1710722223635,
             "tag": "0000_perfect_next_avengers",
             "breakpoints": true
+        },
+        {
+            "idx": 1,
+            "version": "5",
+            "when": 1710778663948,
+            "tag": "0001_vengeful_logan",
+            "breakpoints": true
         }
     ]
 }

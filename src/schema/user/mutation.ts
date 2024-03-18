@@ -55,6 +55,26 @@ schemaBuilder.mutationFields((t) => ({
         authz: {
             rules: ['IsAuthenticated'],
         },
+        resolve: async (parent, args, { DB, USER }) => {
+            const isAlreadyStudent = await StudentRepository.exists({
+                DB,
+                forUserId: USER.id,
+            });
+            if (isAlreadyStudent) throw new Error('User is already a student');
+
+            const newStudent = await StudentRepository.createStudentProfile({
+                DB,
+                userId: USER.id,
+            });
+
+            return newStudent;
+        },
+    }),
+    completeMyStudentProfile: t.field({
+        type: StudentRef,
+        authz: {
+            rules: ['IsAuthenticated'],
+        },
         args: {
             communeId: t.arg.int({
                 required: true,

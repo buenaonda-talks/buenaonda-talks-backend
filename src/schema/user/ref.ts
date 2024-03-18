@@ -151,6 +151,8 @@ schemaBuilder.objectType(StudentRef, {
             },
         }),
 
+        completedProfile: t.exposeBoolean('completedProfile'),
+
         collegeId: t.exposeID('collegeId', { nullable: true }),
         convocatoryId: t.exposeID('convocatoryId', { nullable: true }),
 
