@@ -397,44 +397,44 @@ class ConvocatoryStatItem {
         `);
 
         const result = (await this.DB.execute(statement).then((result) => result[0])) as {
-            accepted: number;
-            accepted_terms: number;
-            rejected_terms: number;
-            pending_terms: number;
-            unanswered_terms: number;
-            submitted: number;
-            declined: number;
-            inscriptions: number;
-            assistants: number;
-            added_students: number;
-            signed_up_students: number;
-            scholarships_count: number;
-            scholarship_finished: number;
-            scholarships_withdrawn: number;
+            accepted: string | null;
+            accepted_terms: string | null;
+            rejected_terms: string | null;
+            pending_terms: string | null;
+            unanswered_terms: string | null;
+            submitted: string | null;
+            declined: string | null;
+            inscriptions: string | null;
+            assistants: string | null;
+            added_students: string | null;
+            signed_up_students: string | null;
+            scholarships_count: string | null;
+            scholarship_finished: string | null;
+            scholarships_withdrawn: string | null;
         };
 
         return {
             postulationStats: {
-                accepted: parseInt(result.accepted.toString(), 10),
-                acceptedTerms: parseInt(result.accepted_terms.toString(), 10),
-                rejectedTerms: parseInt(result.rejected_terms.toString(), 10),
-                pendingTerms: parseInt(result.pending_terms.toString(), 10),
-                unansweredTerms: parseInt(result.unanswered_terms.toString(), 10),
-                submitted: parseInt(result.submitted.toString(), 10),
-                declined: parseInt(result.declined.toString(), 10),
+                accepted: parseInt(result.accepted || '0', 10),
+                acceptedTerms: parseInt(result.accepted_terms || '0', 10),
+                rejectedTerms: parseInt(result.rejected_terms || '0', 10),
+                pendingTerms: parseInt(result.pending_terms || '0', 10),
+                unansweredTerms: parseInt(result.unanswered_terms || '0', 10),
+                submitted: parseInt(result.submitted || '0', 10),
+                declined: parseInt(result.declined || '0', 10),
             },
             talkStats: {
-                inscriptions: parseInt(result.inscriptions.toString(), 10),
-                assistants: parseInt(result.assistants.toString(), 10),
+                inscriptions: parseInt(result.inscriptions || '0', 10),
+                assistants: parseInt(result.assistants || '0', 10),
             },
             studentStats: {
-                addedStudents: parseInt(result.added_students.toString(), 10),
-                signedUpStudents: parseInt(result.signed_up_students.toString(), 10),
+                addedStudents: parseInt(result.added_students || '0', 10),
+                signedUpStudents: parseInt(result.signed_up_students || '0', 10),
             },
             scholarships: {
-                count: parseInt(result.scholarships_count.toString(), 10),
-                finished: parseInt(result.scholarship_finished.toString(), 10),
-                withdrawn: parseInt(result.scholarships_withdrawn.toString(), 10),
+                count: parseInt(result.scholarships_count || '0', 10),
+                finished: parseInt(result.scholarship_finished || '0', 10),
+                withdrawn: parseInt(result.scholarships_withdrawn || '0', 10),
             },
         };
     }
