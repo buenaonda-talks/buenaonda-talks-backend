@@ -14,12 +14,12 @@ const IsAuthenticated = preExecRule({
 
 const IsAdmin = preExecRule({
     error: 'No tienes permisos para realizar esta acción',
-})(({ USER, DB }: YogaContext) => {
+})(async ({ USER, DB }: YogaContext) => {
     if (!USER) {
         return false;
     }
 
-    const isAdmin = DB.query.adminProfileTable.findFirst({
+    const isAdmin = await DB.query.adminProfileTable.findFirst({
         where: (etc, { eq }) => eq(etc.userId, USER.id),
         columns: {
             id: true,
@@ -35,12 +35,12 @@ const IsAdmin = preExecRule({
 
 const IsStudent = preExecRule({
     error: 'No tienes permisos para realizar esta acción',
-})(({ USER, DB }: YogaContext) => {
+})(async ({ USER, DB }: YogaContext) => {
     if (!USER) {
         return false;
     }
 
-    const student = DB.query.studentProfileTable.findFirst({
+    const student = await DB.query.studentProfileTable.findFirst({
         where: (etc, { eq }) => eq(etc.userId, USER.id),
         columns: {
             id: true,
@@ -56,12 +56,12 @@ const IsStudent = preExecRule({
 
 const IsTeacher = preExecRule({
     error: 'No tienes permisos para realizar esta acción',
-})(({ USER, DB }: YogaContext) => {
+})(async ({ USER, DB }: YogaContext) => {
     if (!USER) {
         return false;
     }
 
-    const teacher = DB.query.teacherProfileTable.findFirst({
+    const teacher = await DB.query.teacherProfileTable.findFirst({
         where: (etc, { eq }) => eq(etc.userId, USER.id),
         columns: {
             id: true,
