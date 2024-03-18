@@ -2,6 +2,10 @@
 FROM node:18-alpine3.18 AS builder
 WORKDIR /app
 
+# Set Yarn cache folder and create a volume for it
+ENV YARN_CACHE_FOLDER=/usr/local/yarn-cache
+VOLUME /usr/local/yarn-cache
+
 # Ensure yarn is at its latest version
 RUN yarn global add yarn@1.22.21
 
