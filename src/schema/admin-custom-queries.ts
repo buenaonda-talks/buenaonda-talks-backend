@@ -254,7 +254,7 @@ schemaBuilder.queryFields((t) => ({
             }),
         },
         authz: {
-            rules: [],
+            rules: ['IsAuthenticated', 'IsAdmin'],
         },
         nullable: false,
         resolve: async (root, args, { DB }) => {
