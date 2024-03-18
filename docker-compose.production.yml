@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  app:
+    image: "${IMAGE_NAME}"
+    ports:
+      - "8787:3000"
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - .env
+    depends_on:
+      - redis
+
+  redis:
+    image: "redis:alpine"
