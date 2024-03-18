@@ -11,8 +11,8 @@ CREATE TABLE IF NOT EXISTS "forms_addstudentformentrymodel" (
 	"grade" integer,
 	"email" text NOT NULL,
 	"phone_number" text NOT NULL,
-	"created_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"modified_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "colleges_collegeteacherrelationmodel" (
@@ -21,8 +21,8 @@ CREATE TABLE IF NOT EXISTS "colleges_collegeteacherrelationmodel" (
 	"commits_to_participate" boolean NOT NULL,
 	"college_id" integer NOT NULL,
 	"teacher_id" integer NOT NULL,
-	"created_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"modified_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "colleges_collegemodel" (
@@ -31,8 +31,8 @@ CREATE TABLE IF NOT EXISTS "colleges_collegemodel" (
 	"hide_from_selection" boolean NOT NULL,
 	"commune_id" integer,
 	"normalized_name" text NOT NULL,
-	"created_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"modified_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "core_communemodel" (
@@ -40,16 +40,16 @@ CREATE TABLE IF NOT EXISTS "core_communemodel" (
 	"name" text NOT NULL,
 	"region_id" integer NOT NULL,
 	"normalized_name" text NOT NULL,
-	"created_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"modified_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "core_regionmodel" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
 	"normalized_name" text NOT NULL,
-	"created_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"modified_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "core_scholarshipconvocatorymodel" (
@@ -68,31 +68,31 @@ CREATE TABLE IF NOT EXISTS "core_scholarshipconvocatorymodel" (
 	"devf_informed_resigned" integer,
 	"devf_informed_studying" integer,
 	"devf_informed_not_assisted" integer,
-	"created_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"modified_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "generations_desuscriptionpagevisitmodel" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"user_id" integer NOT NULL,
 	"student_id" integer NOT NULL,
-	"created_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"modified_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "core_devfbatchgroupmodel" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
 	"batch_id" integer NOT NULL,
-	"created_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"modified_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "core_devfbatchmodel" (
 	"id" serial PRIMARY KEY NOT NULL,
-	"created_on" text NOT NULL,
-	"modified_on" text NOT NULL,
-	"number" integer NOT NULL
+	"number" integer NOT NULL,
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "core_devfmodulemodel" (
@@ -108,8 +108,8 @@ CREATE TABLE IF NOT EXISTS "core_devfmodulemodel" (
 	"lesson_8_date" text,
 	"number_of_lessons" integer,
 	"batch_id" integer NOT NULL,
-	"created_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"modified_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "core_devfmoduleprogressmodel" (
@@ -125,23 +125,23 @@ CREATE TABLE IF NOT EXISTS "core_devfmoduleprogressmodel" (
 	"number_of_assitances" integer,
 	"module_id" integer NOT NULL,
 	"scholarship_id" integer NOT NULL,
-	"created_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"modified_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "organizations_organizationmodel" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
-	"created_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"modified_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "core_platzicoursemodel" (
 	"id" serial PRIMARY KEY NOT NULL,
-	"created_on" text NOT NULL,
-	"modified_on" text NOT NULL,
 	"title" text NOT NULL,
-	"platzi_id" text NOT NULL
+	"platzi_id" text NOT NULL,
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "core_platzicourseprogressmodel" (
@@ -153,8 +153,8 @@ CREATE TABLE IF NOT EXISTS "core_platzicourseprogressmodel" (
 	"course_id" integer NOT NULL,
 	"scholarship_id" integer NOT NULL,
 	"last_study_date" text,
-	"created_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"modified_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "core_scholarshipstatushistorymodel" (
@@ -162,8 +162,8 @@ CREATE TABLE IF NOT EXISTS "core_scholarshipstatushistorymodel" (
 	"status" text NOT NULL,
 	"observations" text,
 	"scholarship_id" integer NOT NULL,
-	"created_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"modified_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "core_scholarshipmodel" (
@@ -183,8 +183,8 @@ CREATE TABLE IF NOT EXISTS "core_scholarshipmodel" (
 	"devf_batch_group_id" integer,
 	"devf_added_artificially" boolean NOT NULL,
 	"platzi_completed_mandatory_courses" boolean NOT NULL,
-	"created_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"modified_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "core_postulationsubmissionfieldanswermodel" (
@@ -192,8 +192,8 @@ CREATE TABLE IF NOT EXISTS "core_postulationsubmissionfieldanswermodel" (
 	"value" text,
 	"field_id" integer NOT NULL,
 	"submission_id" integer NOT NULL,
-	"created_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"modified_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "core_postulationsubmissionhistorymodel" (
@@ -201,8 +201,8 @@ CREATE TABLE IF NOT EXISTS "core_postulationsubmissionhistorymodel" (
 	"status" text NOT NULL,
 	"observations" text,
 	"submission_id" integer NOT NULL,
-	"created_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"modified_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "core_postulationsubmissionmodel" (
@@ -215,8 +215,8 @@ CREATE TABLE IF NOT EXISTS "core_postulationsubmissionmodel" (
 	"uuid" text NOT NULL,
 	"current_status_id" integer,
 	"result_notification_via_email_status" text DEFAULT 'not_sent' NOT NULL,
-	"created_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"modified_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "core_formfieldoptionmodel" (
@@ -226,8 +226,8 @@ CREATE TABLE IF NOT EXISTS "core_formfieldoptionmodel" (
 	"automatic_result" text,
 	"automatic_result_observations" text,
 	"order" integer NOT NULL,
-	"created_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"modified_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "core_formfieldmodel" (
@@ -243,8 +243,8 @@ CREATE TABLE IF NOT EXISTS "core_formfieldmodel" (
 	"depends_on_field_option_id" integer,
 	"order" integer NOT NULL,
 	"depends_on_field_id" integer,
-	"created_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"modified_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "core_formmodel" (
@@ -259,8 +259,8 @@ CREATE TABLE IF NOT EXISTS "core_formmodel" (
 	"terms_acceptance_open_date" timestamp,
 	"results_status" text DEFAULT 'not_scheduled' NOT NULL,
 	"version" integer NOT NULL,
-	"created_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"modified_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "core_formvisitmodel" (
@@ -268,8 +268,8 @@ CREATE TABLE IF NOT EXISTS "core_formvisitmodel" (
 	"student_id" integer,
 	"user_id" integer,
 	"form_id" integer NOT NULL,
-	"created_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"modified_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "logger_servicerequest" (
@@ -294,8 +294,8 @@ CREATE TABLE IF NOT EXISTS "core_talkinscriptionmodel" (
 	"assistance_datetime" timestamp,
 	"talk_id" integer NOT NULL,
 	"user_id" integer NOT NULL,
-	"created_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"modified_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "core_talkmodel" (
@@ -314,30 +314,30 @@ CREATE TABLE IF NOT EXISTS "core_talkmodel" (
 	"for_organization_id" integer,
 	"is_visible" boolean NOT NULL,
 	"zoom_register_url" text,
-	"created_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"modified_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "generations_administratormodel" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"user_id" integer NOT NULL,
-	"created_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"modified_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "generations_boardmembermodel" (
 	"id" serial PRIMARY KEY NOT NULL,
-	"created_on" integer NOT NULL,
-	"modified_on" integer NOT NULL,
-	"user_id" integer NOT NULL
+	"user_id" integer NOT NULL,
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "generations_interestedmodel" (
 	"id" serial PRIMARY KEY NOT NULL,
-	"created_on" integer NOT NULL,
-	"modified_on" integer NOT NULL,
-	"rol" integer NOT NULL,
-	"user_id" integer NOT NULL
+	"rol" text NOT NULL,
+	"user_id" integer NOT NULL,
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "generations_studentmodel" (
@@ -374,8 +374,8 @@ CREATE TABLE IF NOT EXISTS "generations_studentmodel" (
 	"whatsapp_link_click_date" timestamp,
 	"note" text,
 	"initiated_session_with_phone_token" boolean NOT NULL,
-	"created_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"modified_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "generations_teachermodel" (
@@ -383,8 +383,8 @@ CREATE TABLE IF NOT EXISTS "generations_teachermodel" (
 	"user_id" integer NOT NULL,
 	"is_verified" boolean NOT NULL,
 	"has_signed_up" boolean NOT NULL,
-	"created_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"modified_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users_usermodel" (
@@ -418,8 +418,8 @@ CREATE TABLE IF NOT EXISTS "generations_visitstologinwithphonetokenmodel" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"phone_token" text,
 	"page" text,
-	"created_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"modified_on" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
+	"created_on" timestamp DEFAULT now() NOT NULL,
+	"modified_on" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "forms_addstudentformentrymodel_student_id_0062b555" ON "forms_addstudentformentrymodel" ("student_id");--> statement-breakpoint

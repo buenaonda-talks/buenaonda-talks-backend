@@ -4,9 +4,8 @@ import { TIMESTAMP_FIELDS } from '@/db/shared';
 
 export const devfBatchTable = pgTable('core_devfbatchmodel', {
     id: serial('id').primaryKey(),
-    createdOn: text('created_on').notNull(),
-    modifiedOn: text('modified_on').notNull(),
     number: integer('number').notNull(),
+    ...TIMESTAMP_FIELDS,
 });
 
 export const devfModuleTable = pgTable(

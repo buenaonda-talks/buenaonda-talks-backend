@@ -1,5 +1,5 @@
 {
-    "id": "6f7d73b6-a41f-4f56-b5b7-0c43cac6afc0",
+    "id": "020b019d-1c9e-4da8-af49-78fc4ddc50e9",
     "prevId": "00000000-0000-0000-0000-000000000000",
     "version": "5",
     "dialect": "pg",
@@ -85,14 +85,14 @@
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 },
                 "modified_on": {
                     "name": "modified_on",
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 }
             },
             "indexes": {
@@ -113,6 +113,7 @@
                 }
             },
             "foreignKeys": {},
+
             "compositePrimaryKeys": {},
             "uniqueConstraints": {}
         },
@@ -155,14 +156,14 @@
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 },
                 "modified_on": {
                     "name": "modified_on",
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 }
             },
             "indexes": {
@@ -178,6 +179,7 @@
                 }
             },
             "foreignKeys": {},
+
             "compositePrimaryKeys": {},
             "uniqueConstraints": {}
         },
@@ -220,14 +222,14 @@
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 },
                 "modified_on": {
                     "name": "modified_on",
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 }
             },
             "indexes": {
@@ -238,6 +240,7 @@
                 }
             },
             "foreignKeys": {},
+
             "compositePrimaryKeys": {},
             "uniqueConstraints": {}
         },
@@ -274,14 +277,14 @@
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 },
                 "modified_on": {
                     "name": "modified_on",
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 }
             },
             "indexes": {
@@ -297,6 +300,7 @@
                 }
             },
             "foreignKeys": {},
+
             "compositePrimaryKeys": {},
             "uniqueConstraints": {}
         },
@@ -327,14 +331,14 @@
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 },
                 "modified_on": {
                     "name": "modified_on",
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 }
             },
             "indexes": {
@@ -447,14 +451,14 @@
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 },
                 "modified_on": {
                     "name": "modified_on",
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 }
             },
             "indexes": {},
@@ -489,14 +493,14 @@
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 },
                 "modified_on": {
                     "name": "modified_on",
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 }
             },
             "indexes": {
@@ -507,6 +511,7 @@
                 }
             },
             "foreignKeys": {},
+
             "compositePrimaryKeys": {},
             "uniqueConstraints": {}
         },
@@ -537,14 +542,14 @@
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 },
                 "modified_on": {
                     "name": "modified_on",
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 }
             },
             "indexes": {
@@ -555,6 +560,7 @@
                 }
             },
             "foreignKeys": {},
+
             "compositePrimaryKeys": {},
             "uniqueConstraints": {}
         },
@@ -568,23 +574,25 @@
                     "primaryKey": true,
                     "notNull": true
                 },
-                "created_on": {
-                    "name": "created_on",
-                    "type": "text",
-                    "primaryKey": false,
-                    "notNull": true
-                },
-                "modified_on": {
-                    "name": "modified_on",
-                    "type": "text",
-                    "primaryKey": false,
-                    "notNull": true
-                },
                 "number": {
                     "name": "number",
                     "type": "integer",
                     "primaryKey": false,
                     "notNull": true
+                },
+                "created_on": {
+                    "name": "created_on",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "modified_on": {
+                    "name": "modified_on",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
                 }
             },
             "indexes": {},
@@ -673,14 +681,14 @@
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 },
                 "modified_on": {
                     "name": "modified_on",
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 }
             },
             "indexes": {
@@ -691,6 +699,7 @@
                 }
             },
             "foreignKeys": {},
+
             "compositePrimaryKeys": {},
             "uniqueConstraints": {}
         },
@@ -775,14 +784,14 @@
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 },
                 "modified_on": {
                     "name": "modified_on",
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 }
             },
             "indexes": {
@@ -798,6 +807,7 @@
                 }
             },
             "foreignKeys": {},
+
             "compositePrimaryKeys": {},
             "uniqueConstraints": {}
         },
@@ -822,14 +832,14 @@
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 },
                 "modified_on": {
                     "name": "modified_on",
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 }
             },
             "indexes": {},
@@ -847,18 +857,6 @@
                     "primaryKey": true,
                     "notNull": true
                 },
-                "created_on": {
-                    "name": "created_on",
-                    "type": "text",
-                    "primaryKey": false,
-                    "notNull": true
-                },
-                "modified_on": {
-                    "name": "modified_on",
-                    "type": "text",
-                    "primaryKey": false,
-                    "notNull": true
-                },
                 "title": {
                     "name": "title",
                     "type": "text",
@@ -870,6 +868,20 @@
                     "type": "text",
                     "primaryKey": false,
                     "notNull": true
+                },
+                "created_on": {
+                    "name": "created_on",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "modified_on": {
+                    "name": "modified_on",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
                 }
             },
             "indexes": {},
@@ -934,14 +946,14 @@
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 },
                 "modified_on": {
                     "name": "modified_on",
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 }
             },
             "indexes": {
@@ -957,6 +969,7 @@
                 }
             },
             "foreignKeys": {},
+
             "compositePrimaryKeys": {},
             "uniqueConstraints": {}
         },
@@ -993,14 +1006,14 @@
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 },
                 "modified_on": {
                     "name": "modified_on",
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 }
             },
             "indexes": {
@@ -1119,14 +1132,14 @@
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 },
                 "modified_on": {
                     "name": "modified_on",
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 }
             },
             "indexes": {
@@ -1188,14 +1201,14 @@
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 },
                 "modified_on": {
                     "name": "modified_on",
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 }
             },
             "indexes": {
@@ -1247,14 +1260,14 @@
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 },
                 "modified_on": {
                     "name": "modified_on",
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 }
             },
             "indexes": {
@@ -1332,14 +1345,14 @@
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 },
                 "modified_on": {
                     "name": "modified_on",
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 }
             },
             "indexes": {
@@ -1413,14 +1426,14 @@
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 },
                 "modified_on": {
                     "name": "modified_on",
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 }
             },
             "indexes": {
@@ -1515,14 +1528,14 @@
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 },
                 "modified_on": {
                     "name": "modified_on",
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 }
             },
             "indexes": {
@@ -1622,14 +1635,14 @@
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 },
                 "modified_on": {
                     "name": "modified_on",
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 }
             },
             "indexes": {
@@ -1681,14 +1694,14 @@
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 },
                 "modified_on": {
                     "name": "modified_on",
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 }
             },
             "indexes": {
@@ -1834,14 +1847,14 @@
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 },
                 "modified_on": {
                     "name": "modified_on",
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 }
             },
             "indexes": {
@@ -1959,14 +1972,14 @@
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 },
                 "modified_on": {
                     "name": "modified_on",
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 }
             },
             "indexes": {
@@ -1997,6 +2010,7 @@
                 }
             },
             "foreignKeys": {},
+
             "compositePrimaryKeys": {},
             "uniqueConstraints": {}
         },
@@ -2021,18 +2035,19 @@
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 },
                 "modified_on": {
                     "name": "modified_on",
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 }
             },
             "indexes": {},
             "foreignKeys": {},
+
             "compositePrimaryKeys": {},
             "uniqueConstraints": {}
         },
@@ -2046,27 +2061,30 @@
                     "primaryKey": true,
                     "notNull": true
                 },
-                "created_on": {
-                    "name": "created_on",
-                    "type": "integer",
-                    "primaryKey": false,
-                    "notNull": true
-                },
-                "modified_on": {
-                    "name": "modified_on",
-                    "type": "integer",
-                    "primaryKey": false,
-                    "notNull": true
-                },
                 "user_id": {
                     "name": "user_id",
                     "type": "integer",
                     "primaryKey": false,
                     "notNull": true
+                },
+                "created_on": {
+                    "name": "created_on",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "modified_on": {
+                    "name": "modified_on",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
                 }
             },
             "indexes": {},
             "foreignKeys": {},
+
             "compositePrimaryKeys": {},
             "uniqueConstraints": {}
         },
@@ -2080,21 +2098,9 @@
                     "primaryKey": true,
                     "notNull": true
                 },
-                "created_on": {
-                    "name": "created_on",
-                    "type": "integer",
-                    "primaryKey": false,
-                    "notNull": true
-                },
-                "modified_on": {
-                    "name": "modified_on",
-                    "type": "integer",
-                    "primaryKey": false,
-                    "notNull": true
-                },
                 "rol": {
                     "name": "rol",
-                    "type": "integer",
+                    "type": "text",
                     "primaryKey": false,
                     "notNull": true
                 },
@@ -2103,6 +2109,20 @@
                     "type": "integer",
                     "primaryKey": false,
                     "notNull": true
+                },
+                "created_on": {
+                    "name": "created_on",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "modified_on": {
+                    "name": "modified_on",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
                 }
             },
             "indexes": {},
@@ -2317,14 +2337,14 @@
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 },
                 "modified_on": {
                     "name": "modified_on",
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 }
             },
             "indexes": {
@@ -2355,6 +2375,7 @@
                 }
             },
             "foreignKeys": {},
+
             "compositePrimaryKeys": {},
             "uniqueConstraints": {}
         },
@@ -2391,14 +2412,14 @@
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 },
                 "modified_on": {
                     "name": "modified_on",
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 }
             },
             "indexes": {},
@@ -2616,14 +2637,14 @@
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 },
                 "modified_on": {
                     "name": "modified_on",
                     "type": "timestamp",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "now()"
                 }
             },
             "indexes": {},

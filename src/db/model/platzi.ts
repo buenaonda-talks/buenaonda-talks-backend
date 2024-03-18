@@ -4,10 +4,9 @@ import { TIMESTAMP_FIELDS } from '@/db/shared';
 
 export const platziCourseTable = pgTable('core_platzicoursemodel', {
     id: serial('id').primaryKey(),
-    createdOn: text('created_on').notNull(),
-    modifiedOn: text('modified_on').notNull(),
     title: text('title').notNull(),
     platziId: text('platzi_id').notNull(),
+    ...TIMESTAMP_FIELDS,
 });
 
 export const scholarshipPlatziCourseProgressTable = pgTable(

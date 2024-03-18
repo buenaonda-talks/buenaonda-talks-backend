@@ -86,13 +86,12 @@ export const userTable = pgTable(
 
 export const boardMemberTable = pgTable('generations_boardmembermodel', {
     id: serial('id').primaryKey(),
-    createdOn: integer('created_on').notNull(),
-    modifiedOn: integer('modified_on').notNull(),
     userId: integer('user_id')
         .notNull()
         .references(() => userTable.id, {
             onDelete: 'cascade',
         }),
+    ...TIMESTAMP_FIELDS,
 });
 
 export const studentProfileTable = pgTable(
@@ -185,14 +184,13 @@ export type InsertStudentSchema = z.infer<typeof insertStudentSchema>;
 
 export const interestedProfileTable = pgTable('generations_interestedmodel', {
     id: serial('id').primaryKey(),
-    createdOn: integer('created_on').notNull(),
-    modifiedOn: integer('modified_on').notNull(),
     rol: text('rol').notNull(),
     userId: integer('user_id')
         .notNull()
         .references(() => userTable.id, {
             onDelete: 'cascade',
         }),
+    ...TIMESTAMP_FIELDS,
 });
 
 export const adminProfileTable = pgTable('generations_administratormodel', {
