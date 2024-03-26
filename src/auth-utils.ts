@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { UserProfileInfoSchema, updateUserProfileInfoAsync } from './clerk';
 import { ORM_TYPE } from './db/get-db';
 import { Clerk, verifyToken } from '@clerk/backend';
@@ -19,13 +20,19 @@ export const getUserWithClerkAsync = async ({ request, DB }: Options) => {
 
     let verified: JwtPayload | null = null;
     try {
+        console.log('JWT_TOKEN', JWT_TOKEN);
+        console.log('env.CLERK.ISSUER_ID', env.CLERK.ISSUER_ID);
+        console.log('env.CLERK.PEM_PUBLIC_KEY', env.CLERK.PEM_PUBLIC_KEY);
         verified = await verifyToken(JWT_TOKEN, {
             issuer: env.CLERK.ISSUER_ID,
             jwtKey: env.CLERK.PEM_PUBLIC_KEY,
         });
     } catch (e) {
+        console.error('Error verifying token', e);
         verified = null;
     }
+
+    console.log('verified', verified);
 
     if (!verified) {
         return null;
@@ -45,7 +52,9 @@ export const getUserWithClerkAsync = async ({ request, DB }: Options) => {
         exp,
     } = verified;
 
+    console.log('email', email);
     if (exp < Date.now() / 1000) {
+        console.log('Token expired');
         return null;
     }
 
@@ -63,6 +72,8 @@ export const getUserWithClerkAsync = async ({ request, DB }: Options) => {
     });
 
     const user = await updateUserProfileInfoAsync(DB, profileInfo);
+    console.log('user', user);
+
     const isStudent = await DB.select({
         id: studentProfileTable.id,
     })
